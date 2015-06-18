@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Paperwork</string>
+    <string name="title_activity_edit_note">Note</string>
+    <string name="title_activity_view_note">Note</string>
+    <string name="no_notes">No notes</string>
+    <string name="no_notebooks">No notes</string>
+    <string name="empty_title_hint">Your note title</string>
+    <string name="empty_note_hint">Write your note</string>
+    <string name="empty_note">Note was not saved</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="search">Search</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="drawer_open">Menu opened</string>
+    <string name="drawer_close">Menu closed</string>
+    <string name="all_notes">All notes</string>
+    <string name="notebooks">Notebooks</string>
+    <string name="settings">Settings</string>
+    <string name="logout">Logout</string>
+    <string name="tags">Tags</string>
+    <string name="about">About</string>
+    <string name="more">More</string>
+</resources>
