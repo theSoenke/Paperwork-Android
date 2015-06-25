@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean mUserLearnedDrawer;
     private SubMenu mTagMenu;
 
-    public static MainActivity getsInstance()
+    public static MainActivity getInstance()
     {
         return sInstance;
     }

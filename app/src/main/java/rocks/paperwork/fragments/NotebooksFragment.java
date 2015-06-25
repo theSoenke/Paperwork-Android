@@ -26,7 +26,7 @@ public class NotebooksFragment extends Fragment implements AsyncCallback
     private static NotebooksFragment sInstance;
     private NotebookAdapter mNotebooksAdapter;
 
-    public static NotebooksFragment getsInstance()
+    public static NotebooksFragment getInstance()
     {
         return sInstance;
     }
