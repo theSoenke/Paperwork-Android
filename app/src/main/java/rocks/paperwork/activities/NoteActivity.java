@@ -1,6 +1,5 @@
 package rocks.paperwork.activities;
 
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -18,7 +17,6 @@ import android.widget.EditText;
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
-import rocks.paperwork.data.NotesDataSource;
 import rocks.paperwork.network.SyncNotesTask;
 
 public class NoteActivity extends AppCompatActivity
@@ -143,7 +141,7 @@ public class NoteActivity extends AppCompatActivity
         }
         else if (id == R.id.action_save)
         {
-            NotesDataSource.getInstance(this).deleteNote(mNote);
+            //NotesDataSource.getInstance(this).deleteNote(mNote);
             setNoteResult();
             onBackPressed();
             return true;
@@ -186,9 +184,6 @@ public class NoteActivity extends AppCompatActivity
     {
         if (changesToSave())
         {
-            mNote.setTitle(mTextTitle.getText().toString());
-            mNote.setContent(mEditContent.getText().toString());
-
             SyncNotesTask syncNotes = new SyncNotesTask(this);
 
             if (mNewNote)

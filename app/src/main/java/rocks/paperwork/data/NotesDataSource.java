@@ -125,6 +125,8 @@ public class NotesDataSource
 
     public void createNote(Note note)
     {
+        deleteNote(note); // deletes note if it already exists in database
+
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.NoteEntry.COLUMN_ID, note.getId());
         values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, note.getTitle());

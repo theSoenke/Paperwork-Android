@@ -45,6 +45,8 @@ public class SyncNotesTask
     private final int FETCH_NOTEBOOKS = 0;
     private final int FETCH_NOTES = 1;
     private final int FETCH_TAGS = 2;
+    private final int CREATE_NOTE = 3;
+    private final int UPDATE_NOTE = 4;
     private final Context mContext;
 
 
@@ -94,17 +96,15 @@ public class SyncNotesTask
     {
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new CreateNoteTask(note, hash).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes");
+        new CreateNoteTask(note, hash, CREATE_NOTE).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes");
     }
 
     public void updateNote(Note note)
     {
-        // TODO update note
-        /*
+        // FIXME will fail when try to update a shared note from another user
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new CreateNoteTask(note, hash).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
-        */
+        new CreateNoteTask(note, hash, UPDATE_NOTE).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
     }
 
     public void deleteNote(Note note)
@@ -188,13 +188,18 @@ public class SyncNotesTask
             note.setContent(content);
             note.setUpdatedAt(date);
 
-            NotesDataSource notesDataSource = NotesDataSource.getInstance(mContext);
-            notesDataSource.createNote(note);
+            storeNote(note);
         }
         catch (JSONException e)
         {
             Log.e(LOG_TAG, "Error parsing JSON " + jsonNote, e);
         }
+    }
+
+    private void storeNote(Note note)
+    {
+        NotesDataSource notesDataSource = NotesDataSource.getInstance(mContext);
+        notesDataSource.createNote(note);
     }
 
     private void parseAllTags(String jsonStr)
@@ -235,9 +240,9 @@ public class SyncNotesTask
             notesDataSource.createNotebook(notebook);
         }
 
-        if (NotebooksFragment.getsInstance() != null)
+        if (NotebooksFragment.getInstance() != null)
         {
-            NotebooksFragment.getsInstance().updateData();
+            NotebooksFragment.getInstance().updateData();
         }
     }
 
@@ -251,9 +256,9 @@ public class SyncNotesTask
             notesDataSource.createTag(tag);
         }
 
-        if (MainActivity.getsInstance() != null)
+        if (MainActivity.getInstance() != null)
         {
-            MainActivity.getsInstance().updateData();
+            MainActivity.getInstance().updateData();
         }
     }
 
@@ -261,14 +266,7 @@ public class SyncNotesTask
     {
         Log.e(LOG_TAG, "Authentication failed");
 
-        if ((mContext) != null)
-        {
-            ((MainActivity) mContext).logout();
-        }
-        else
-        {
-            Log.e(LOG_TAG, "Context needs to be MainActivity");
-        }
+        MainActivity.getInstance().logout();
     }
 
     private class FetchTask extends AsyncTask<String, Void, String>
@@ -405,11 +403,13 @@ public class SyncNotesTask
     {
         private final String mHash;
         private final Note mNote;
+        private final int mTaskId;
 
-        public CreateNoteTask(Note note, String hash)
+        public CreateNoteTask(Note note, String hash, int task)
         {
             mNote = note;
             mHash = hash;
+            mTaskId = task;
         }
 
         @Override
@@ -428,14 +428,28 @@ public class SyncNotesTask
                 urlConnection.setRequestProperty("Authorization", "Basic " + mHash);
                 urlConnection.setConnectTimeout(5000);
                 urlConnection.setReadTimeout(10000);
-                urlConnection.setRequestMethod("POST");
-                urlConnection.connect();
 
                 // create json note
                 JSONObject note = new JSONObject();
                 note.put("title", mNote.getTitle());
                 note.put("content", mNote.getContent());
-                note.put("content_preview", mNote.getPreview());
+
+                if (mTaskId == CREATE_NOTE)
+                {
+                    urlConnection.setRequestMethod("POST");
+                    note.put("content_preview", mNote.getPreview());
+                }
+                else if (mTaskId == UPDATE_NOTE)
+                {
+                    urlConnection.setRequestMethod("PUT");
+                }
+                else
+                {
+                    Log.e(LOG_TAG, "Task does not exist");
+                }
+
+                urlConnection.connect();
+
 
                 OutputStream outputStream = urlConnection.getOutputStream();
                 outputStream.write(note.toString().getBytes());
@@ -520,8 +534,18 @@ public class SyncNotesTask
 
             try
             {
-                JSONObject noteJson = new JSONObject(result).getJSONObject("response");
-                parseNote(noteJson);
+                JSONObject jsonNote = new JSONObject(result).getJSONObject("response");
+
+                if (mTaskId == CREATE_NOTE)
+                {
+                    parseNote(jsonNote);
+                }
+                else if (mTaskId == UPDATE_NOTE)
+                {
+                    Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
+                    mNote.setUpdatedAt(date);
+                    storeNote(mNote);
+                }
 
                 if (NotesFragment.getInstance() != null)
                 {
