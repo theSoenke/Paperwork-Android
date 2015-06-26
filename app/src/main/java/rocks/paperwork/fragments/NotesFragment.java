@@ -130,7 +130,6 @@ public class NotesFragment extends Fragment implements AsyncCallback
             allNotes = notesDataSource.getAllNotes();
         }
 
-
         mNotesAdapter.addAll(allNotes);
         mNotesAdapter.notifyDataSetChanged();
 

@@ -26,4 +26,5 @@
     <string name="connection_error_message">No connection to Paperwork possible.</string>
     <string name="note">note</string>
     <string name="notes">notes</string>
+    <string name="wait">Please wait...</string>
 </resources>

@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
               xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:gravity="center_horizontal"
@@ -17,18 +17,8 @@
         android:minHeight="?attr/actionBarSize"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:titleTextAppearance="@style/AppTheme.Toolbar.Title"
-        app:title="@string/action_sign_in"/>
-
-    <!-- Login progress -->
-    <ProgressBar
-        android:id="@+id/login_progress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone"/>
-
+        app:title="@string/action_sign_in"
+        app:titleTextAppearance="@style/AppTheme.Toolbar.Title"/>
 
     <ScrollView
         android:id="@+id/login_form"
@@ -103,7 +93,7 @@
                 android:id="@+id/sign_in_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/button"
                 android:text="@string/action_sign_in"
                 android:textColor="@color/clouds"/>
