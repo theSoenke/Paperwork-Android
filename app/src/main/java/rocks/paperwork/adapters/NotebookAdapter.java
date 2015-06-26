@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +55,7 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         return rowView;
     }
 
-    public static class Notebook
+    public static class Notebook implements Serializable
     {
         public static final String DEFAULT_ID = "00000000-0000-0000-0000-000000000000";
         private final String mId;

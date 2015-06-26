@@ -71,7 +71,9 @@ public class NotesDataSource
                 null
         );
 
-        return cursor.getCount();
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
     }
 
     public List<Note> getAllNotes()
@@ -82,6 +84,40 @@ public class NotesDataSource
                 DatabaseContract.NoteEntry.TABLE_NAME,
                 null,
                 null,
+                null,
+                null,
+                null,
+                DatabaseContract.NoteEntry.COLUMN_UPDATED_AT + " DESC");
+
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast())
+        {
+            Note note = new Note(cursor.getString(0));
+            note.setTitle(cursor.getString(1));
+            note.setContent(cursor.getString(2));
+            Date date = DatabaseHelper.getDateTime(cursor.getString(3));
+            note.setUpdatedAt(date);
+            note.setNotebookId(cursor.getString(4));
+            notes.add(note);
+
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return notes;
+    }
+
+    public List<Note> getAllNotesFromNotebook(Notebook notebook)
+    {
+        List<Note> notes = new ArrayList<>();
+        String selection = DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY + " = '" + notebook.getId() + "'";
+
+        Cursor cursor = mDatabase.query(
+                DatabaseContract.NoteEntry.TABLE_NAME,
+                null,
+                selection,
                 null,
                 null,
                 null,

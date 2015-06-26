@@ -102,7 +102,7 @@ public class SyncNotesTask
     {
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new CreateNoteTask(note, hash, ModifyNote.create_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes");
+        new ModifyNoteTask(note, hash, ModifyNote.create_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes");
     }
 
     public void updateNote(Note note)
@@ -110,16 +110,15 @@ public class SyncNotesTask
         // FIXME will fail when try to update a shared note from another user
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new CreateNoteTask(note, hash, ModifyNote.update_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
+        new ModifyNoteTask(note, hash, ModifyNote.update_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
     }
 
     public void deleteNote(Note note)
     {
         // FIXME will fail when try to delete a shared note from another user
-
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new CreateNoteTask(note, hash, ModifyNote.delete_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
+        new ModifyNoteTask(note, hash, ModifyNote.delete_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
     }
 
     private void parseAllNotebooks(String jsonStr)
@@ -398,13 +397,13 @@ public class SyncNotesTask
         }
     }
 
-    private class CreateNoteTask extends AsyncTask<String, Void, String>
+    private class ModifyNoteTask extends AsyncTask<String, Void, String>
     {
         private final String mHash;
         private final Note mNote;
         private final ModifyNote mTask;
 
-        public CreateNoteTask(Note note, String hash, ModifyNote task)
+        public ModifyNoteTask(Note note, String hash, ModifyNote task)
         {
             mNote = note;
             mHash = hash;

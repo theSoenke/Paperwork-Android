@@ -43,7 +43,10 @@ public class NoteActivity extends AppCompatActivity
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(mToolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar() != null)
+        {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         mTextTitle = (EditText) findViewById(R.id.note_title);
         mEditContent = (EditText) findViewById(R.id.note_edit_content);
@@ -173,7 +176,6 @@ public class NoteActivity extends AppCompatActivity
             else if (mEditMode && mNewNote)
             {
                 setNoteResult();
-                setMode(false);
                 onBackPressed();
             }
             else
@@ -221,7 +223,7 @@ public class NoteActivity extends AppCompatActivity
 
         if (mNote == null) // note does not exist yet
         {
-            if (content.length() != 0 || title.length() != 0)
+            if (!content.isEmpty() || title.isEmpty())
             {
                 return true;
             }
@@ -271,6 +273,10 @@ public class NoteActivity extends AppCompatActivity
     {
         if (mEditMode)
         {
+            if (!changesToSave() && mNewNote)
+            {
+                super.onBackPressed();
+            }
             setMode(false);
         }
         else if (changesToSave())
