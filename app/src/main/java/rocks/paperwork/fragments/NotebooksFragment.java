@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -42,6 +43,21 @@ public class NotebooksFragment extends Fragment implements AsyncCallback
 
         ListView notesList = (ListView) view.findViewById(R.id.list_notebooks);
         notesList.setAdapter(mNotebooksAdapter);
+
+        notesList.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+            {
+                Notebook notebook = mNotebooksAdapter.getItem(i);
+                getActivity().setTitle(notebook.getTitle());
+                Fragment fragment = Fragment.instantiate(getActivity(), NotesFragment.class.getName());
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("Notebook", notebook);
+                fragment.setArguments(bundle);
+                (getFragmentManager().beginTransaction().replace(R.id.main_container, fragment)).commit();
+            }
+        });
 
         // loads notebooks from the database
         updateView();

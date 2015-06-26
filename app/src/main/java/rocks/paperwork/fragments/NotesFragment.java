@@ -34,7 +34,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
     private NotesAdapter mNotesAdapter;
     private TextView emptyText;
     private SwipeRefreshLayout mSwipeContainer;
-
+    private Notebook mNotebook;
 
     public static NotesFragment getInstance()
     {
@@ -62,7 +62,14 @@ public class NotesFragment extends Fragment implements AsyncCallback
             @Override
             public void onClick(View v)
             {
-                showNotebookSelection();
+                if(mNotebook == null)
+                {
+                    showNotebookSelection();
+                }
+                else
+                {
+                    createNewNote(mNotebook);
+                }
             }
         });
 
@@ -90,6 +97,15 @@ public class NotesFragment extends Fragment implements AsyncCallback
             }
         });
 
+        Bundle bundle = getArguments();
+        if (bundle != null)
+        {
+            if (bundle.containsKey("Notebook"))
+            {
+                mNotebook = (Notebook) bundle.getSerializable("Notebook");
+            }
+        }
+
         // loads notes from the database
         updateView();
 
@@ -103,7 +119,17 @@ public class NotesFragment extends Fragment implements AsyncCallback
         mNotesAdapter.clear();
 
         NotesDataSource notesDataSource = NotesDataSource.getInstance(getActivity());
-        List<Note> allNotes = notesDataSource.getAllNotes();
+        List<Note> allNotes;
+
+        if (mNotebook != null)
+        {
+            allNotes = notesDataSource.getAllNotesFromNotebook(mNotebook);
+        }
+        else
+        {
+            allNotes = notesDataSource.getAllNotes();
+        }
+
 
         mNotesAdapter.addAll(allNotes);
         mNotesAdapter.notifyDataSetChanged();
@@ -135,13 +161,18 @@ public class NotesFragment extends Fragment implements AsyncCallback
                 {
                     public void onClick(DialogInterface dialog, int which)
                     {
-                        Intent editNoteIntent = new Intent(getActivity(), NoteActivity.class);
-                        editNoteIntent.putExtra("NotebookId", allNotebooks.get(which).getId());
-                        editNoteIntent.putExtra("IsEditable", true);
-                        startActivity(editNoteIntent);
+                        createNewNote(allNotebooks.get(which));
                     }
                 });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void createNewNote(Notebook notebook)
+    {
+        Intent editNoteIntent = new Intent(getActivity(), NoteActivity.class);
+        editNoteIntent.putExtra("NotebookId", notebook.getId());
+        editNoteIntent.putExtra("IsEditable", true);
+        startActivity(editNoteIntent);
     }
 }
