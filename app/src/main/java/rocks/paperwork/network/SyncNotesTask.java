@@ -149,7 +149,7 @@ public class SyncNotesTask
 
     private void parseAllNotes(String jsonStr)
     {
-        JSONObject jsonData = null;
+        JSONObject jsonData;
         try
         {
             jsonData = new JSONObject(jsonStr);
@@ -177,7 +177,6 @@ public class SyncNotesTask
 
             String id = jsonNote.getString("id");
             String title = version.getString("title");
-            String preview = version.getString("content_preview");
             String content = version.getString("content");
             Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
             String notebookId = jsonNote.getString("notebook_id");
@@ -477,20 +476,20 @@ public class SyncNotesTask
                 }
                 else if (responseCode != HttpURLConnection.HTTP_OK)
                 {
-                    Log.e(LOG_TAG, "Error while creating note, response code: " + urlConnection.getResponseCode());
+                    Log.d(LOG_TAG, "Error while creating note, response code: " + urlConnection.getResponseCode());
                 }
             }
             catch (MalformedURLException e)
             {
-                Log.e(LOG_TAG, "malformed url", e);
+                Log.e(LOG_TAG, "Malformed URL");
             }
             catch (SocketTimeoutException e)
             {
-                Log.e(LOG_TAG, "timeout");
+                Log.d(LOG_TAG, "Timeout");
             }
             catch (SSLHandshakeException e)
             {
-                Log.e(LOG_TAG, "handshake exception", e);
+                Log.d(LOG_TAG, "handshake exception", e);
             }
             catch (JSONException e)
             {
@@ -498,12 +497,12 @@ public class SyncNotesTask
             }
             catch (FileNotFoundException e)
             {
-                // workaround because response code is always 200, even if authentication failed
-                authenticationFailed();
+                Log.e(LOG_TAG, params[0], e);
+                //authenticationFailed();
             }
             catch (IOException e)
             {
-                Log.e(LOG_TAG, "io exception", e);
+                Log.e(LOG_TAG, "IOException", e);
             }
             finally
             {

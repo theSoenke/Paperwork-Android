@@ -1,14 +1,12 @@
 <resources>
     <string name="app_name">Paperwork</string>
-    <string name="title_activity_edit_note">Note</string>
-    <string name="title_activity_view_note">Note</string>
     <string name="no_notes">No notes</string>
     <string name="no_notebooks">No notes</string>
     <string name="empty_title_hint">Your note title</string>
     <string name="empty_note_hint">Write your note</string>
     <string name="empty_note">Note was not saved</string>
     <string name="save">Save</string>
-    <string name="delete">Delete</string>
+    <string name="delete">Delete Note</string>
     <string name="search">Search</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="drawer_open">Menu opened</string>
@@ -20,4 +18,9 @@
     <string name="tags">Tags</string>
     <string name="about">About</string>
     <string name="more">More</string>
+    <string name="discard">Discard?</string>
+    <string name="discard_changes">Your change are not saved. Do you really want to discard your changes?</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="empty_title_error">Title cannot be empty</string>
 </resources>

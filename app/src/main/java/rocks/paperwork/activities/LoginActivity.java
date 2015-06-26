@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -274,24 +275,32 @@ public class LoginActivity extends Activity
             }
             catch (MalformedURLException e)
             {
-                Log.e(LOG_TAG, "Malformed url", e);
+                Log.e(LOG_TAG, "Malformed url");
+                return false;
             }
             catch (SocketTimeoutException e)
             {
-                Log.e(LOG_TAG, "Timeout");
+                Log.d(LOG_TAG, "Timeout");
+                return false;
             }
             catch (SSLHandshakeException e)
             {
-                Log.e(LOG_TAG, "SSL error", e);
+                Log.d(LOG_TAG, "SSL error", e);
+                return false;
+            }
+            catch (ConnectException e)
+            {
+                Log.d(LOG_TAG, "Failed to connect");
+                return false;
             }
             catch (FileNotFoundException e)
             {
-                // authentication failed
                 return false;
             }
             catch (IOException e)
             {
                 Log.e(LOG_TAG, "IO Exception", e);
+                return false;
             }
             finally
             {
