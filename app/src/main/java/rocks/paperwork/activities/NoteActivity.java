@@ -206,6 +206,13 @@ public class NoteActivity extends AppCompatActivity
         super.onPause();
     }
 
+    @Override
+    protected void onStop()
+    {
+        hideKeyboard();
+        super.onStop();
+    }
+
     private boolean changesToSave()
     {
         String title = mTextTitle.getText().toString();

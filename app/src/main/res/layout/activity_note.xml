@@ -15,7 +15,6 @@
         android:background="@color/note_toolbar"
         android:minHeight="?attr/actionBarSize"/>
 
-
     <EditText
         android:id="@+id/note_title"
         android:layout_width="match_parent"
@@ -42,6 +41,8 @@
 
         <requestFocus/>
     </EditText>
+
+    <!--<include layout="@layout/rich_edit"/>-->
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/edit_note"
