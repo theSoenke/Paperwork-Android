@@ -8,7 +8,6 @@
     <string name="save">Save</string>
     <string name="delete">Delete Note</string>
     <string name="search">Search</string>
-    <string name="title_activity_main">MainActivity</string>
     <string name="drawer_open">Menu opened</string>
     <string name="drawer_close">Menu closed</string>
     <string name="all_notes">All notes</string>

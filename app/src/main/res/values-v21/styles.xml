@@ -17,6 +17,6 @@
     </style>
 
     <style name="ToolBarStyle" parent="">
-        <item name="android:elevation">@dimen/toolbar_elevation</item>
+        <item name="android:elevation">4dp</item>
     </style>
 </resources>
