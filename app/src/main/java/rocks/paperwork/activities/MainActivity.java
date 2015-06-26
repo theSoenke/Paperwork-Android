@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void updateData()
+    public void updateView()
     {
         // TODO put in the right place and set tag icons
 

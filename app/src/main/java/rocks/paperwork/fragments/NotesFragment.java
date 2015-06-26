@@ -91,13 +91,13 @@ public class NotesFragment extends Fragment implements AsyncCallback
         });
 
         // loads notes from the database
-        updateData();
+        updateView();
 
         return view;
     }
 
     @Override
-    public void updateData()
+    public void updateView()
     {
         mSwipeContainer.setRefreshing(false);
         mNotesAdapter.clear();
