@@ -44,13 +44,13 @@ public class NotebooksFragment extends Fragment implements AsyncCallback
         notesList.setAdapter(mNotebooksAdapter);
 
         // loads notebooks from the database
-        updateData();
+        updateView();
 
         return view;
     }
 
     @Override
-    public void updateData()
+    public void updateView()
     {
         mNotebooksAdapter.clear();
 

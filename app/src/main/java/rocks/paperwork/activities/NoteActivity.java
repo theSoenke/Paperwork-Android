@@ -94,11 +94,7 @@ public class NoteActivity extends AppCompatActivity
      */
     private void setMode(boolean editMode)
     {
-        // will call onCreateOptionsMenu() and set visibility of save button
-        invalidateOptionsMenu();
-
         mEditNoteButton.setVisibility(editMode ? View.GONE : View.VISIBLE);
-
 
         if (editMode)
         {
@@ -215,6 +211,11 @@ public class NoteActivity extends AppCompatActivity
 
     private boolean changesToSave()
     {
+        if (!mEditMode)
+        {
+            return false;
+        }
+
         String title = mTextTitle.getText().toString();
         String content = mEditContent.getText().toString();
 

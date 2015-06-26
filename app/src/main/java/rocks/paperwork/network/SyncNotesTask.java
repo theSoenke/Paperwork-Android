@@ -39,17 +39,26 @@ import rocks.paperwork.fragments.NotesFragment;
 public class SyncNotesTask
 {
     private final String LOG_TAG = SyncNotesTask.class.getName();
-    private final int FETCH_NOTEBOOKS = 0;
-    private final int FETCH_NOTES = 1;
-    private final int FETCH_TAGS = 2;
-    private final int CREATE_NOTE = 3;
-    private final int UPDATE_NOTE = 4;
     private final Context mContext;
 
 
     public SyncNotesTask(Context context)
     {
         mContext = context;
+    }
+
+    private enum FetchTaskName
+    {
+        notebooks,
+        notes,
+        tags
+    }
+
+    private enum ModifyNote
+    {
+        create_note,
+        update_note,
+        delete_note
     }
 
     public void fetchAllData()
@@ -66,7 +75,7 @@ public class SyncNotesTask
     {
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new FetchTask(FETCH_NOTEBOOKS, hash).execute(host + "/api/v1/notebooks/");
+        new FetchTask(FetchTaskName.notebooks, hash).execute(host + "/api/v1/notebooks/");
     }
 
     /**
@@ -76,7 +85,7 @@ public class SyncNotesTask
     {
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new FetchTask(FETCH_NOTES, hash).execute(host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes");
+        new FetchTask(FetchTaskName.notes, hash).execute(host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes");
     }
 
     /**
@@ -86,14 +95,14 @@ public class SyncNotesTask
     {
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new FetchTask(FETCH_TAGS, hash).execute(host + "/api/v1/tags/");
+        new FetchTask(FetchTaskName.tags, hash).execute(host + "/api/v1/tags/");
     }
 
     public void createNote(Note note)
     {
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new CreateNoteTask(note, hash, CREATE_NOTE).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes");
+        new CreateNoteTask(note, hash, ModifyNote.create_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes");
     }
 
     public void updateNote(Note note)
@@ -101,14 +110,16 @@ public class SyncNotesTask
         // FIXME will fail when try to update a shared note from another user
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new CreateNoteTask(note, hash, UPDATE_NOTE).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
+        new CreateNoteTask(note, hash, ModifyNote.update_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
     }
 
     public void deleteNote(Note note)
     {
-        // TODO delete note
-        /*NotesDataSource notesData = NotesDataSource.getInstance(mContext);
-        notesData.deleteNote(note);*/
+        // FIXME will fail when try to delete a shared note from another user
+
+        String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
+        String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
+        new CreateNoteTask(note, hash, ModifyNote.delete_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
     }
 
     private void parseAllNotebooks(String jsonStr)
@@ -238,7 +249,7 @@ public class SyncNotesTask
 
         if (NotebooksFragment.getInstance() != null)
         {
-            NotebooksFragment.getInstance().updateData();
+            NotebooksFragment.getInstance().updateView();
         }
     }
 
@@ -254,7 +265,7 @@ public class SyncNotesTask
 
         if (MainActivity.getInstance() != null)
         {
-            MainActivity.getInstance().updateData();
+            MainActivity.getInstance().updateView();
         }
     }
 
@@ -267,13 +278,13 @@ public class SyncNotesTask
 
     private class FetchTask extends AsyncTask<String, Void, String>
     {
-        private final int mFetchTask;
+        private final FetchTaskName mFetchTask;
         private final String mHash;
 
 
-        public FetchTask(int fetchTask, String hash)
+        public FetchTask(FetchTaskName task, String hash)
         {
-            mFetchTask = fetchTask;
+            mFetchTask = task;
             mHash = hash;
         }
 
@@ -363,20 +374,20 @@ public class SyncNotesTask
                 return;
             }
 
-            if (mFetchTask == FETCH_NOTEBOOKS)
+            if (mFetchTask == FetchTaskName.notebooks)
             {
                 parseAllNotebooks(result);
             }
-            else if (mFetchTask == FETCH_NOTES)
+            else if (mFetchTask == FetchTaskName.notes)
             {
                 parseAllNotes(result);
 
                 if (NotesFragment.getInstance() != null)
                 {
-                    NotesFragment.getInstance().updateData();
+                    NotesFragment.getInstance().updateView();
                 }
             }
-            else if (mFetchTask == FETCH_TAGS)
+            else if (mFetchTask == FetchTaskName.tags)
             {
                 parseAllTags(result);
             }
@@ -391,13 +402,13 @@ public class SyncNotesTask
     {
         private final String mHash;
         private final Note mNote;
-        private final int mTaskId;
+        private final ModifyNote mTask;
 
-        public CreateNoteTask(Note note, String hash, int task)
+        public CreateNoteTask(Note note, String hash, ModifyNote task)
         {
             mNote = note;
             mHash = hash;
-            mTaskId = task;
+            mTask = task;
         }
 
         @Override
@@ -422,14 +433,18 @@ public class SyncNotesTask
                 note.put("title", mNote.getTitle());
                 note.put("content", mNote.getContent());
 
-                if (mTaskId == CREATE_NOTE)
+                if (mTask == ModifyNote.create_note)
                 {
                     urlConnection.setRequestMethod("POST");
                     note.put("content_preview", mNote.getPreview());
                 }
-                else if (mTaskId == UPDATE_NOTE)
+                else if (mTask == ModifyNote.update_note)
                 {
                     urlConnection.setRequestMethod("PUT");
+                }
+                else if (mTask == ModifyNote.delete_note)
+                {
+                    urlConnection.setRequestMethod("DELETE");
                 }
                 else
                 {
@@ -437,7 +452,6 @@ public class SyncNotesTask
                 }
 
                 urlConnection.connect();
-
 
                 OutputStream outputStream = urlConnection.getOutputStream();
                 outputStream.write(note.toString().getBytes());
@@ -515,22 +529,26 @@ public class SyncNotesTask
 
             try
             {
-                JSONObject jsonNote = new JSONObject(result).getJSONObject("response");
-
-                if (mTaskId == CREATE_NOTE)
+                if (mTask == ModifyNote.create_note)
                 {
+                    JSONObject jsonNote = new JSONObject(result).getJSONObject("response");
                     parseNote(jsonNote);
                 }
-                else if (mTaskId == UPDATE_NOTE)
+                else if (mTask == ModifyNote.update_note)
                 {
+                    JSONObject jsonNote = new JSONObject(result).getJSONObject("response");
                     Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
                     mNote.setUpdatedAt(date);
                     storeNote(mNote);
                 }
+                else if (mTask == ModifyNote.delete_note)
+                {
+                    NotesDataSource.getInstance(mContext).deleteNote(mNote);
+                }
 
                 if (NotesFragment.getInstance() != null)
                 {
-                    NotesFragment.getInstance().updateData();
+                    NotesFragment.getInstance().updateView();
                 }
             }
             catch (JSONException e)
