@@ -12,6 +12,7 @@ import java.util.List;
 
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
+import rocks.paperwork.data.NotesDataSource;
 
 public class NotebookAdapter extends ArrayAdapter<Notebook>
 {
@@ -31,8 +32,24 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.notebook_item, parent, false);
 
+        Notebook notebook = mNotebooks.get(position);
+
+        int notebookCount = NotesDataSource.getInstance(mContext).getNumberOfNotesInNotebook(notebook);
         TextView notebookTitle = (TextView) rowView.findViewById(R.id.notebook_title);
-        notebookTitle.setText(mNotebooks.get(position).getTitle());
+        TextView notebookCountText = (TextView) rowView.findViewById(R.id.notebook_count);
+
+        notebookTitle.setText(notebook.getTitle());
+
+        String noteText;
+        if(notebookCount == 0 || notebookCount > 1)
+        {
+            noteText = mContext.getString(R.string.notes);
+        }
+        else
+        {
+            noteText = mContext.getString(R.string.note);
+        }
+        notebookCountText.setText(Integer.toString(notebookCount) + " " +  noteText);
 
         return rowView;
     }
