@@ -1,17 +1,20 @@
 package rocks.paperwork.activities;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import rocks.paperwork.R;
@@ -22,6 +25,7 @@ import rocks.paperwork.network.SyncNotesTask;
 public class NoteActivity extends AppCompatActivity
 {
     private final String LOG_TAG = NoteActivity.class.getName();
+    private Toolbar mToolbar;
     private Note mNote;
     private EditText mTextTitle;
     private EditText mEditContent;
@@ -36,8 +40,8 @@ public class NoteActivity extends AppCompatActivity
         setContentView(R.layout.activity_note);
 
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(mToolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -59,7 +63,7 @@ public class NoteActivity extends AppCompatActivity
             mNote = (NotesAdapter.Note) getIntent().getExtras().getSerializable("NOTE");
             mTextTitle.setText(mNote.getTitle());
 
-            String content = parseNoteText(mNote.getContent());
+            String content = mNote.getContent();
             mEditContent.setText(Html.fromHtml(content));
         }
         else
@@ -81,7 +85,7 @@ public class NoteActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
         {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            getWindow().setStatusBarColor(getResources().getColor(R.color.primaryDarkColor));
+            getWindow().setStatusBarColor(getResources().getColor(R.color.toolbar_text));
         }
     }
 
@@ -95,24 +99,44 @@ public class NoteActivity extends AppCompatActivity
 
         mEditNoteButton.setVisibility(editMode ? View.GONE : View.VISIBLE);
 
+
         if (editMode)
         {
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            mEditContent.requestFocus();
+            showKeyboard();
+
             mEditContent.setFocusableInTouchMode(true);
             mEditContent.setCursorVisible(true);
             mTextTitle.setFocusableInTouchMode(true);
             mTextTitle.setCursorVisible(true);
+            mToolbar.setNavigationIcon(R.drawable.ic_done_grey);
         }
         else
         {
+            hideKeyboard();
+
             mEditContent.setFocusable(false);
             mEditContent.setCursorVisible(false);
 
             mTextTitle.setFocusable(false);
             mTextTitle.setCursorVisible(false);
+            mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_grey);
         }
 
         mEditMode = editMode;
+    }
+
+    private void showKeyboard()
+    {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
+    private void hideKeyboard()
+    {
+        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(mEditContent.getWindowToken(), 0);
+
     }
 
     @Override
@@ -120,7 +144,6 @@ public class NoteActivity extends AppCompatActivity
     {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_note, menu);
-        menu.findItem(R.id.action_save).setVisible(mEditMode);
         return true;
     }
 
@@ -135,15 +158,33 @@ public class NoteActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == android.R.id.home)
         {
-            setResult(RESULT_CANCELED);
-            onBackPressed();
-            return true;
-        }
-        else if (id == R.id.action_save)
-        {
-            //NotesDataSource.getInstance(this).deleteNote(mNote);
-            setNoteResult();
-            onBackPressed();
+            if (mEditMode)
+            {
+                String title = mTextTitle.getText().toString();
+
+                if (title.isEmpty())
+                {
+                    mTextTitle.setError(getString(R.string.empty_title_error));
+                    return false;
+                }
+            }
+
+            if (mEditMode && !mNewNote)
+            {
+                setNoteResult();
+                setMode(false);
+            }
+            else if (mEditMode && mNewNote)
+            {
+                setNoteResult();
+                setMode(false);
+                onBackPressed();
+            }
+            else
+            {
+                onBackPressed();
+            }
+
             return true;
         }
         else if (id == R.id.action_delete)
@@ -158,10 +199,17 @@ public class NoteActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onPause()
+    {
+        hideKeyboard();
+        super.onPause();
+    }
+
     private boolean changesToSave()
     {
-        Editable content = mEditContent.getText();
-        Editable title = mTextTitle.getText();
+        String title = mTextTitle.getText().toString();
+        String content = mEditContent.getText().toString();
 
         if (mNote == null) // note does not exist yet
         {
@@ -172,7 +220,11 @@ public class NoteActivity extends AppCompatActivity
         }
         else
         {
-            if (!content.toString().equals(mNote.getContent()) || !title.toString().equals(mNote.getTitle()))
+            if (!content.equals(Html.fromHtml(mNote.getContent()).toString()))
+            {
+                return true;
+            }
+            else if (!title.equals(mNote.getTitle()))
             {
                 return true;
             }
@@ -206,10 +258,44 @@ public class NoteActivity extends AppCompatActivity
         }
     }
 
-    private String parseNoteText(String text)
+    @Override
+    public void onBackPressed()
     {
-        text = text.replace("\\", "");
+        if (mEditMode)
+        {
+            setMode(false);
+        }
+        else if (changesToSave())
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.discard).setMessage(R.string.discard_changes)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i)
+                        {
+                            back();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i)
+                        {
 
-        return text;
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
+
+    private void back()
+    {
+        super.onBackPressed();
     }
 }

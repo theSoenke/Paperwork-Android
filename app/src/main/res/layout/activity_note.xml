@@ -1,15 +1,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@android:color/white"
                 android:fitsSystemWindows="true"
                 tools:context="rocks.paperwork.activities.NoteActivity">
 
-    <include
+    <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_actionbar"
-        layout="@layout/toolbar_default"
+        style="android:Widget.Holo.ActionBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:background="@color/note_toolbar"
+        android:minHeight="?attr/actionBarSize"/>
+
 
     <EditText
         android:id="@+id/note_title"
@@ -40,7 +45,6 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/edit_note"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -53,6 +57,6 @@
         app:borderWidth="0dp"
         app:layout_anchor="@id/note_edit_content"
         app:layout_anchorGravity="bottom|right|end"
-        app:rippleColor="@color/clouds"/>
+        app:rippleColor="@color/primaryDarkColor"/>
 
 </RelativeLayout>
