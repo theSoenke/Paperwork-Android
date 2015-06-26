@@ -30,6 +30,8 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 
+import javax.net.ssl.SSLHandshakeException;
+
 import rocks.paperwork.R;
 import rocks.paperwork.data.HostPreferences;
 
@@ -292,6 +294,11 @@ public class LoginActivity extends Activity
             catch (FileNotFoundException e)
             {
                 return FILE_NOT_FOUND;
+            }
+            catch (SSLHandshakeException e)
+            {
+                Log.d(LOG_TAG, "SSL Certificate is not valid");
+                return CONNECTION_FAILED;
             }
             catch (IOException e)
             {

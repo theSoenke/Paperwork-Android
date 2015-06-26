@@ -15,14 +15,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.net.ssl.SSLHandshakeException;
 
 import rocks.paperwork.activities.MainActivity;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
@@ -320,21 +317,13 @@ public class SyncNotesTask
                     Log.e(LOG_TAG, "Response code: " + urlConnection.getResponseCode());
                 }
             }
-            catch (MalformedURLException e)
-            {
-                Log.e(LOG_TAG, "Malformed url: " + params[0]);
-            }
             catch (SocketTimeoutException e)
             {
-                Log.e(LOG_TAG, "Timeout");
-            }
-            catch (SSLHandshakeException e)
-            {
-                Log.e(LOG_TAG, "SSL error", e);
+                Log.d(LOG_TAG, "Timeout");
             }
             catch (FileNotFoundException e)
             {
-                // workaround because response code is always 200, even if authentication failed
+                // FIXME workaround because response code is always 200, even if authentication failed
                 authenticationFailed();
             }
             catch (IOException e)
@@ -479,26 +468,19 @@ public class SyncNotesTask
                     Log.d(LOG_TAG, "Error while creating note, response code: " + urlConnection.getResponseCode());
                 }
             }
-            catch (MalformedURLException e)
+            catch (JSONException e)
             {
-                Log.e(LOG_TAG, "Malformed URL");
+                Log.e(LOG_TAG, "Error creating JSON");
             }
             catch (SocketTimeoutException e)
             {
                 Log.d(LOG_TAG, "Timeout");
             }
-            catch (SSLHandshakeException e)
-            {
-                Log.d(LOG_TAG, "handshake exception", e);
-            }
-            catch (JSONException e)
-            {
-                Log.e(LOG_TAG, "Error creating JSON");
-            }
             catch (FileNotFoundException e)
             {
-                Log.e(LOG_TAG, params[0], e);
-                //authenticationFailed();
+                // FIXME workaround because response code is always 200, even if authentication failed
+                authenticationFailed();
+
             }
             catch (IOException e)
             {

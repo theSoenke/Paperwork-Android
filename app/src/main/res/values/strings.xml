@@ -25,4 +25,6 @@
     <string name="empty_title_error">Title cannot be empty</string>
     <string name="connection_error">Connection failed</string>
     <string name="connection_error_message">No connection to Paperwork possible.</string>
+    <string name="note">note</string>
+    <string name="notes">notes</string>
 </resources>

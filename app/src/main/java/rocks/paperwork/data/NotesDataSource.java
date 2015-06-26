@@ -57,6 +57,23 @@ public class NotesDataSource
         return notebooks;
     }
 
+    public int getNumberOfNotesInNotebook(Notebook notebook)
+    {
+        String selection = DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY + " = '" + notebook.getId() + "'";
+
+        Cursor cursor = mDatabase.query(
+                DatabaseContract.NoteEntry.TABLE_NAME,
+                null,
+                selection,
+                null,
+                null,
+                null,
+                null
+        );
+
+        return cursor.getCount();
+    }
+
     public List<Note> getAllNotes()
     {
         List<Note> notes = new ArrayList<>();
@@ -81,8 +98,6 @@ public class NotesDataSource
             note.setUpdatedAt(date);
             note.setNotebookId(cursor.getString(4));
             notes.add(note);
-
-//            Log.e("NoteId", note.getId());
 
             cursor.moveToNext();
         }
