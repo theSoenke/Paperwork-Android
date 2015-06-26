@@ -10,6 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -52,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onRestoreInstanceState(Bundle savedInstanceState)
     {
         super.onRestoreInstanceState(savedInstanceState);
-
         mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION, 0);
     }
 
@@ -207,11 +207,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setTitle(getString(R.string.all_notes));
                 fragment = Fragment.instantiate(MainActivity.this, NotesFragment.class.getName());
                 (fm.beginTransaction().replace(R.id.main_container, fragment)).commit();
+                mCurrentSelectedPosition = 0;
                 break;
             case R.id.nav_notebooks:
                 setTitle(getString(R.string.notebooks));
                 fragment = Fragment.instantiate(MainActivity.this, NotebooksFragment.class.getName());
                 (fm.beginTransaction().replace(R.id.main_container, fragment)).commit();
+                mCurrentSelectedPosition = 1;
                 break;
             case R.id.nav_settings:
                 break;
