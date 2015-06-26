@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -25,11 +27,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-
-import javax.net.ssl.SSLHandshakeException;
 
 import rocks.paperwork.R;
 import rocks.paperwork.data.HostPreferences;
@@ -159,7 +158,10 @@ public class LoginActivity extends Activity
         {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
-            focusView.requestFocus();
+            if (focusView != null)
+            {
+                focusView.requestFocus();
+            }
         }
         else
         {
@@ -245,10 +247,15 @@ public class LoginActivity extends Activity
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<String, Void, Boolean>
+    public class UserLoginTask extends AsyncTask<String, Void, Integer>
     {
         private final String LOG_TAG = UserLoginTask.class.getName();
         private final String mHash;
+
+        private final int SUCCESS = 0;
+        private final int CONNECTION_FAILED = 1;
+        private final int FILE_NOT_FOUND = 2;
+        private final int IO_EXCEPTION = 3;
 
         public UserLoginTask(String hash)
         {
@@ -256,7 +263,7 @@ public class LoginActivity extends Activity
         }
 
         @Override
-        protected Boolean doInBackground(String... params)
+        protected Integer doInBackground(String... params)
         {
             HttpURLConnection urlConnection = null;
 
@@ -268,39 +275,28 @@ public class LoginActivity extends Activity
                 urlConnection.setConnectTimeout(5000);
                 urlConnection.setReadTimeout(10000);
                 urlConnection.setRequestMethod("GET");
-                urlConnection.setUseCaches(false);
                 urlConnection.connect();
 
                 urlConnection.getInputStream();
             }
-            catch (MalformedURLException e)
-            {
-                Log.e(LOG_TAG, "Malformed url");
-                return false;
-            }
             catch (SocketTimeoutException e)
             {
                 Log.d(LOG_TAG, "Timeout");
-                return false;
-            }
-            catch (SSLHandshakeException e)
-            {
-                Log.d(LOG_TAG, "SSL error", e);
-                return false;
+                return CONNECTION_FAILED;
             }
             catch (ConnectException e)
             {
                 Log.d(LOG_TAG, "Failed to connect");
-                return false;
+                return CONNECTION_FAILED;
             }
             catch (FileNotFoundException e)
             {
-                return false;
+                return FILE_NOT_FOUND;
             }
             catch (IOException e)
             {
                 Log.e(LOG_TAG, "IO Exception", e);
-                return false;
+                return IO_EXCEPTION;
             }
             finally
             {
@@ -310,27 +306,32 @@ public class LoginActivity extends Activity
                 }
             }
 
-            return true;
+            return SUCCESS;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success)
+        protected void onPostExecute(final Integer result)
         {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success)
+            if (result == SUCCESS)
             {
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             }
-            else
+            else if (result == FILE_NOT_FOUND)
             {
                 HostPreferences.clearPreferences(LoginActivity.this);
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             }
+            else
+            {
+                HostPreferences.clearPreferences(LoginActivity.this);
+                showTimeoutAlert();
+            }
+
+            mAuthTask = null;
+            showProgress(false);
         }
 
         @Override
@@ -339,6 +340,21 @@ public class LoginActivity extends Activity
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+    private void showTimeoutAlert()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.connection_error).setMessage(R.string.connection_error_message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
 

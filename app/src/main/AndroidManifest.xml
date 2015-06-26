@@ -11,6 +11,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".activities.NoteActivity"
+            android:windowSoftInputMode="adjustResize"
             android:label="">
         </activity>
         <activity
