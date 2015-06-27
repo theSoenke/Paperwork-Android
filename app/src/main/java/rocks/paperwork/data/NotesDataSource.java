@@ -38,21 +38,24 @@ public class NotesDataSource
     public List<Notebook> getAllNotebooks()
     {
         List<Notebook> notebooks = new ArrayList<>();
-
         Cursor cursor = mDatabase.query(DatabaseContract.NotebookEntry.TABLE_NAME, null, null, null, null, null, null);
 
-        cursor.moveToFirst();
-
-        while (!cursor.isAfterLast())
+        try
         {
-            Notebook notebook = new Notebook(cursor.getString(0));
-            notebook.setTitle(cursor.getString(1));
-            notebooks.add(notebook);
+            int idColumn = cursor.getColumnIndex(DatabaseContract.NotebookEntry.COLUMN_ID);
+            int titleColumn = cursor.getColumnIndex(DatabaseContract.NotebookEntry.COLUMN_TITLE);
 
-            cursor.moveToNext();
+            while (cursor.moveToNext())
+            {
+                Notebook notebook = new Notebook(cursor.getString(idColumn));
+                notebook.setTitle(cursor.getString(titleColumn));
+                notebooks.add(notebook);
+            }
         }
-
-        cursor.close();
+        finally
+        {
+            cursor.close();
+        }
 
         return notebooks;
     }
@@ -89,22 +92,29 @@ public class NotesDataSource
                 null,
                 DatabaseContract.NoteEntry.COLUMN_UPDATED_AT + " DESC");
 
-        cursor.moveToFirst();
-
-        while (!cursor.isAfterLast())
+        try
         {
-            Note note = new Note(cursor.getString(0));
-            note.setTitle(cursor.getString(1));
-            note.setContent(cursor.getString(2));
-            Date date = DatabaseHelper.getDateTime(cursor.getString(3));
-            note.setUpdatedAt(date);
-            note.setNotebookId(cursor.getString(4));
-            notes.add(note);
+            int idColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_ID);
+            int titleColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_TITLE);
+            int contentColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_CONTENT);
+            int updatedAtColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT);
+            int notebookColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY);
 
-            cursor.moveToNext();
+            while (cursor.moveToNext())
+            {
+                Note note = new Note(cursor.getString(idColumn));
+                note.setTitle(cursor.getString(titleColumn));
+                note.setContent(cursor.getString(contentColumn));
+                Date date = DatabaseHelper.getDateTime(cursor.getString(updatedAtColumn));
+                note.setUpdatedAt(date);
+                note.setNotebookId(cursor.getString(notebookColumn));
+                notes.add(note);
+            }
         }
-
-        cursor.close();
+        finally
+        {
+            cursor.close();
+        }
 
         return notes;
     }
@@ -123,22 +133,29 @@ public class NotesDataSource
                 null,
                 DatabaseContract.NoteEntry.COLUMN_UPDATED_AT + " DESC");
 
-        cursor.moveToFirst();
-
-        while (!cursor.isAfterLast())
+        try
         {
-            Note note = new Note(cursor.getString(0));
-            note.setTitle(cursor.getString(1));
-            note.setContent(cursor.getString(2));
-            Date date = DatabaseHelper.getDateTime(cursor.getString(3));
-            note.setUpdatedAt(date);
-            note.setNotebookId(cursor.getString(4));
-            notes.add(note);
+            int idColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_ID);
+            int titleColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_TITLE);
+            int contentColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_CONTENT);
+            int updatedAtColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT);
+            int notebookColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY);
 
-            cursor.moveToNext();
+            while (cursor.moveToNext())
+            {
+                Note note = new Note(cursor.getString(idColumn));
+                note.setTitle(cursor.getString(titleColumn));
+                note.setContent(cursor.getString(contentColumn));
+                Date date = DatabaseHelper.getDateTime(cursor.getString(updatedAtColumn));
+                note.setUpdatedAt(date);
+                note.setNotebookId(cursor.getString(notebookColumn));
+                notes.add(note);
+            }
         }
-
-        cursor.close();
+        finally
+        {
+            cursor.close();
+        }
 
         return notes;
     }
@@ -146,21 +163,24 @@ public class NotesDataSource
     public List<Tag> getAllTags()
     {
         List<Tag> tags = new ArrayList<>();
-
         Cursor cursor = mDatabase.query(DatabaseContract.TagEntry.TABLE_NAME, null, null, null, null, null, null);
 
-        cursor.moveToFirst();
-
-        while (!cursor.isAfterLast())
+        try
         {
-            Tag tag = new Tag(cursor.getString(0));
-            tag.setTitle(cursor.getString(1));
-            tags.add(tag);
+            int idColumn = cursor.getColumnIndex(DatabaseContract.TagEntry.COLUMN_ID);
+            int titleColumn = cursor.getColumnIndex(DatabaseContract.TagEntry.COLUMN_TITLE);
 
-            cursor.moveToNext();
+            while (cursor.moveToNext())
+            {
+                Tag tag = new Tag(cursor.getString(idColumn));
+                tag.setTitle(cursor.getString(titleColumn));
+                tags.add(tag);
+            }
         }
-
-        cursor.close();
+        finally
+        {
+            cursor.close();
+        }
 
         return tags;
     }
