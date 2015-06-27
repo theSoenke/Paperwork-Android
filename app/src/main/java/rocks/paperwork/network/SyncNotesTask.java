@@ -369,7 +369,7 @@ public class SyncNotesTask
 
             if (result.isEmpty())
             {
-                Log.e(LOG_TAG, "Result is empty");
+                Log.e(LOG_TAG, "Result is empty, task" + mFetchTask.toString());
                 return;
             }
 
@@ -452,10 +452,13 @@ public class SyncNotesTask
 
                 urlConnection.connect();
 
-                OutputStream outputStream = urlConnection.getOutputStream();
-                outputStream.write(note.toString().getBytes());
-                outputStream.flush();
-                outputStream.close();
+                if (mTask != ModifyNote.delete_note)
+                {
+                    OutputStream outputStream = urlConnection.getOutputStream();
+                    outputStream.write(note.toString().getBytes());
+                    outputStream.flush();
+                    outputStream.close();
+                }
 
                 // read response
                 InputStream inputStream = urlConnection.getInputStream();

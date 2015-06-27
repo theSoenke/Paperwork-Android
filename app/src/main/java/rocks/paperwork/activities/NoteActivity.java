@@ -43,7 +43,7 @@ public class NoteActivity extends AppCompatActivity
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(mToolbar);
 
-        if(getSupportActionBar() != null)
+        if (getSupportActionBar() != null)
         {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -74,13 +74,13 @@ public class NoteActivity extends AppCompatActivity
             mNewNote = true;
         }
 
-        if (getIntent().hasExtra("IsEditable"))
+        if (getIntent().hasExtra("EditMode"))
         {
-            mEditMode = getIntent().getExtras().getBoolean("IsEditable");
+            mEditMode = getIntent().getExtras().getBoolean("EditMode");
         }
         else
         {
-            Log.e(LOG_TAG, "IsEditable is not set");
+            Log.e(LOG_TAG, "EditMode is not set");
         }
 
         setMode(mEditMode);
@@ -187,10 +187,15 @@ public class NoteActivity extends AppCompatActivity
         }
         else if (id == R.id.action_delete)
         {
-            SyncNotesTask deleteNoteTask = new SyncNotesTask(this);
-            deleteNoteTask.deleteNote(mNote);
-            onBackPressed();
-            finish();
+            if (mNewNote)
+            {
+                onBackPressed();
+                finish();
+            }
+            else
+            {
+                showDeleteNoteDialog();
+            }
             return true;
         }
 
@@ -311,5 +316,31 @@ public class NoteActivity extends AppCompatActivity
     private void back()
     {
         super.onBackPressed();
+    }
+
+    private void showDeleteNoteDialog()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
+        builder.setTitle(getString(R.string.delete) + ": " + mNote.getTitle())
+                .setMessage(R.string.delete_note_message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        new SyncNotesTask(NoteActivity.this).deleteNote(mNote);
+                        onBackPressed();
+                        finish();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

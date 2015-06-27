@@ -62,7 +62,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
             @Override
             public void onClick(View v)
             {
-                if(mNotebook == null)
+                if (mNotebook == null)
                 {
                     showNotebookSelection();
                 }
@@ -78,10 +78,17 @@ public class NotesFragment extends Fragment implements AsyncCallback
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
             {
-                Intent viewNoteIntent = new Intent(getActivity(), NoteActivity.class);
-                viewNoteIntent.putExtra("NOTE", mNotesAdapter.getItem(position));
-                viewNoteIntent.putExtra("IsEditable", false);
-                startActivity(viewNoteIntent);
+                viewNote(mNotesAdapter.getItem(position), false);
+            }
+        });
+
+        notesList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
+        {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l)
+            {
+                showNoteDialog(i);
+                return true;
             }
         });
 
@@ -171,7 +178,74 @@ public class NotesFragment extends Fragment implements AsyncCallback
     {
         Intent editNoteIntent = new Intent(getActivity(), NoteActivity.class);
         editNoteIntent.putExtra("NotebookId", notebook.getId());
-        editNoteIntent.putExtra("IsEditable", true);
+        editNoteIntent.putExtra("EditMode", true);
         startActivity(editNoteIntent);
+    }
+
+    private void viewNote(Note note, boolean editMode)
+    {
+        Intent viewNoteIntent = new Intent(getActivity(), NoteActivity.class);
+        viewNoteIntent.putExtra("NOTE", note);
+        viewNoteIntent.putExtra("EditMode", editMode);
+        startActivity(viewNoteIntent);
+    }
+
+    private void showNoteDialog(int position)
+    {
+        final Note note = mNotesAdapter.getItem(position);
+        CharSequence[] options = {
+                getString(R.string.edit),
+                getString(R.string.share),
+                getString(R.string.add_tag),
+                getString(R.string.delete)};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setItems(options, new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int which)
+            {
+                switch (which)
+                {
+                    case 0: // edit
+                        viewNote(note, true);
+                        break;
+                    case 1: // share
+                        // TODO implement share
+                        break;
+                    case 2: // add a tag
+                        // TODO implement add tags
+                        break;
+                    case 3: // delete note
+                        showDeleteNoteDialog(note);
+                        break;
+                }
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showDeleteNoteDialog(final Note note)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(getString(R.string.delete) + ": " + note.getTitle())
+                .setMessage(R.string.delete_note_message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        new SyncNotesTask(getActivity()).deleteNote(note);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
