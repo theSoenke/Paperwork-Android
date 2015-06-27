@@ -302,7 +302,7 @@ public class LoginActivity extends Activity
             else
             {
                 HostPreferences.clearPreferences(LoginActivity.this);
-                showTimeoutAlert();
+                showTimeoutDialog();
             }
 
             mAuthTask = null;
@@ -317,7 +317,7 @@ public class LoginActivity extends Activity
         }
     }
 
-    private void showTimeoutAlert()
+    private void showTimeoutDialog()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.connection_error).setMessage(R.string.connection_error_message)
