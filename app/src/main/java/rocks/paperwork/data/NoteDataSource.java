@@ -115,7 +115,6 @@ public class NoteDataSource
         {
             cursor.close();
         }
-
         return notes;
     }
 
@@ -197,6 +196,22 @@ public class NoteDataSource
         mContext.getContentResolver().insert(DatabaseContract.NotebookEntry.CONTENT_URI, values);
     }
 
+    public void bulkInsertNotebooks(List<Notebook> notebooks)
+    {
+        ContentValues[] contentValues = new ContentValues[notebooks.size()];
+
+        for (int i = 0; i < notebooks.size(); i++)
+        {
+            ContentValues values = new ContentValues();
+            values.put(DatabaseContract.NotebookEntry.COLUMN_ID, notebooks.get(i).getId());
+            values.put(DatabaseContract.NotebookEntry.COLUMN_TITLE, notebooks.get(i).getTitle());
+
+            contentValues[i] = values;
+        }
+
+        mContext.getContentResolver().bulkInsert(DatabaseContract.NotebookEntry.CONTENT_URI, contentValues);
+    }
+
     public void insertNote(Note note)
     {
         ContentValues values = new ContentValues();
@@ -209,6 +224,25 @@ public class NoteDataSource
         mContext.getContentResolver().insert(DatabaseContract.NoteEntry.CONTENT_URI, values);
     }
 
+    public void bulkInsertNotes(List<Note> notes)
+    {
+        ContentValues[] contentValues = new ContentValues[notes.size()];
+
+        for (int i = 0; i < notes.size(); i++)
+        {
+            ContentValues values = new ContentValues();
+            values.put(DatabaseContract.NoteEntry.COLUMN_ID, notes.get(i).getId());
+            values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, notes.get(i).getTitle());
+            values.put(DatabaseContract.NoteEntry.COLUMN_CONTENT, notes.get(i).getContent());
+            values.put(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT, DatabaseHelper.getDateTime(notes.get(i).getUpdatedAt()));
+            values.put(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY, notes.get(i).getNotebookId());
+
+            contentValues[i] = values;
+        }
+
+        mContext.getContentResolver().bulkInsert(DatabaseContract.NoteEntry.CONTENT_URI, contentValues);
+    }
+
     public void insertTag(Tag tag)
     {
         ContentValues values = new ContentValues();
@@ -218,9 +252,20 @@ public class NoteDataSource
         mContext.getContentResolver().insert(DatabaseContract.TagEntry.CONTENT_URI, values);
     }
 
-    public void deleteAllNotebooks()
+    public void bulkInsertTags(List<Tag> tags)
     {
-        mContext.getContentResolver().delete(DatabaseContract.NotebookEntry.CONTENT_URI, null, null);
+        ContentValues[] contentValues = new ContentValues[tags.size()];
+
+        for (int i = 0; i < tags.size(); i++)
+        {
+            ContentValues values = new ContentValues();
+            values.put(DatabaseContract.NotebookEntry.COLUMN_ID, tags.get(i).getId());
+            values.put(DatabaseContract.NotebookEntry.COLUMN_TITLE, tags.get(i).getTitle());
+
+            contentValues[i] = values;
+        }
+
+        mContext.getContentResolver().bulkInsert(DatabaseContract.TagEntry.CONTENT_URI, contentValues);
     }
 
     public void deleteNote(Note note)
@@ -235,6 +280,11 @@ public class NoteDataSource
     public void deleteAllNotes()
     {
         mContext.getContentResolver().delete(DatabaseContract.NoteEntry.CONTENT_URI, null, null);
+    }
+
+    public void deleteAllNotebooks()
+    {
+        mContext.getContentResolver().delete(DatabaseContract.NotebookEntry.CONTENT_URI, null, null);
     }
 
     public void deleteAllTags()

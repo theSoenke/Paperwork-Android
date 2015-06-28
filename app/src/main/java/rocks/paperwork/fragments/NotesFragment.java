@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
@@ -23,9 +25,11 @@ import rocks.paperwork.activities.NoteActivity;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
+import rocks.paperwork.data.DatabaseContract;
 import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.interfaces.AsyncCallback;
-import rocks.paperwork.network.SyncNotesTask;
+import rocks.paperwork.sync.SyncAdapter;
+import rocks.paperwork.sync.SyncNotesTask;
 
 
 public class NotesFragment extends Fragment implements AsyncCallback
@@ -100,7 +104,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
             @Override
             public void onRefresh()
             {
-                new SyncNotesTask(getActivity()).fetchAllData();
+                SyncAdapter.syncImmediately(getActivity());
             }
         });
 
@@ -113,7 +117,16 @@ public class NotesFragment extends Fragment implements AsyncCallback
             }
         }
 
-        // loads notes from the database
+        getActivity().getContentResolver().registerContentObserver(
+                DatabaseContract.NoteEntry.CONTENT_URI, true, new ContentObserver(new Handler(getActivity().getMainLooper()))
+                {
+                    @Override
+                    public void onChange(boolean selfChange)
+                    {
+                        updateView();
+                    }
+                });
+
         updateView();
 
         return view;

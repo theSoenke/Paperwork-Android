@@ -1,4 +1,4 @@
-package rocks.paperwork.network;
+package rocks.paperwork.sync;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -45,57 +45,6 @@ public class SyncNotesTask
     public SyncNotesTask(Context context)
     {
         mContext = context;
-    }
-
-    private enum FetchTaskName
-    {
-        notebooks,
-        notes,
-        tags
-    }
-
-    private enum ModifyNote
-    {
-        create_note,
-        update_note,
-        delete_note
-    }
-
-    public void fetchAllData()
-    {
-        fetchNotebooks();
-        fetchNotes();
-        fetchTags();
-    }
-
-    /**
-     * fetches all notebooks from the server
-     */
-    public void fetchNotebooks()
-    {
-        String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
-        String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new FetchTask(FetchTaskName.notebooks, hash).execute(host + "/api/v1/notebooks/");
-    }
-
-    /**
-     * fetches all notes from the server
-     */
-    public void fetchNotes()
-    {
-        String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
-        String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new FetchTask(FetchTaskName.notes, hash).execute(host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes");
-    }
-
-    /**
-     * fetches all tags
-     */
-    public void fetchTags()
-    {
-        String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
-        String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new FetchTask(FetchTaskName.tags, hash).execute(host + "/api/v1/tags/");
     }
 
     public void createNote(Note note)
@@ -275,126 +224,11 @@ public class SyncNotesTask
         MainActivity.getInstance().logout();
     }
 
-    private class FetchTask extends AsyncTask<String, Void, String>
+    private enum ModifyNote
     {
-        private final FetchTaskName mFetchTask;
-        private final String mHash;
-
-
-        public FetchTask(FetchTaskName task, String hash)
-        {
-            mFetchTask = task;
-            mHash = hash;
-        }
-
-
-        @Override
-        protected String doInBackground(String... params)
-        {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String jsonStr = "";
-
-            try
-            {
-                URL url = new URL(params[0]);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("Authorization", "Basic " + mHash);
-                urlConnection.setConnectTimeout(5000);
-                urlConnection.setReadTimeout(10000);
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuilder builder = new StringBuilder();
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null)
-                {
-                    builder.append(line).append("\n");
-                }
-                jsonStr = builder.toString();
-
-                int responseCode = urlConnection.getResponseCode();
-
-                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED)
-                {
-                    authenticationFailed();
-                }
-                else if (responseCode != HttpURLConnection.HTTP_OK)
-                {
-                    Log.e(LOG_TAG, "Response code: " + urlConnection.getResponseCode());
-                }
-            }
-            catch (SocketTimeoutException e)
-            {
-                Log.d(LOG_TAG, "Timeout");
-            }
-            catch (FileNotFoundException e)
-            {
-                // FIXME workaround because response code is always 200, even if authentication failed
-                authenticationFailed();
-            }
-            catch (IOException e)
-            {
-                Log.e(LOG_TAG, "IO Exception", e);
-            }
-            finally
-            {
-                if (urlConnection != null)
-                {
-                    urlConnection.disconnect();
-                }
-
-                if (reader != null)
-                {
-                    try
-                    {
-                        reader.close();
-                    }
-                    catch (final IOException e)
-                    {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-            return jsonStr;
-        }
-
-        @Override
-        protected void onPostExecute(String result)
-        {
-            super.onPostExecute(result);
-
-            if (result.isEmpty())
-            {
-                Log.e(LOG_TAG, "Result is empty, task" + mFetchTask.toString());
-                return;
-            }
-
-            if (mFetchTask == FetchTaskName.notebooks)
-            {
-                parseAllNotebooks(result);
-            }
-            else if (mFetchTask == FetchTaskName.notes)
-            {
-                parseAllNotes(result);
-
-                if (NotesFragment.getInstance() != null)
-                {
-                    NotesFragment.getInstance().updateView();
-                }
-            }
-            else if (mFetchTask == FetchTaskName.tags)
-            {
-                parseAllTags(result);
-            }
-            else
-            {
-                Log.e(LOG_TAG, "Task does not exist");
-            }
-        }
+        create_note,
+        update_note,
+        delete_note
     }
 
     private class ModifyNoteTask extends AsyncTask<String, Void, String>
