@@ -13,7 +13,7 @@ import java.util.List;
 
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
-import rocks.paperwork.data.NotesDataSource;
+import rocks.paperwork.data.NoteDataSource;
 
 public class NotebookAdapter extends ArrayAdapter<Notebook>
 {
@@ -35,7 +35,7 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
 
         Notebook notebook = mNotebooks.get(position);
 
-        int notebookCount = NotesDataSource.getInstance(mContext).getNumberOfNotesInNotebook(notebook);
+        int notebookCount = NoteDataSource.getInstance(mContext).getNumberOfNotesInNotebook(notebook);
         TextView notebookTitle = (TextView) rowView.findViewById(R.id.notebook_title);
         TextView notebookCountText = (TextView) rowView.findViewById(R.id.notebook_count);
 

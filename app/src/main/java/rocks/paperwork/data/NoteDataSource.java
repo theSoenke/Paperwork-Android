@@ -3,7 +3,6 @@ package rocks.paperwork.data;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,23 +13,23 @@ import rocks.paperwork.adapters.NotesAdapter.Note;
 import rocks.paperwork.adapters.Tag;
 
 /**
- * maintains database connection and gives access to notebooks, notes and tags
+ * Abstraction layer for the NoteContentProvider
  */
-public class NotesDataSource
+public class NoteDataSource
 {
-    private static NotesDataSource sInstance;
-    private final SQLiteDatabase mDatabase;
+    private static NoteDataSource sInstance;
+    private final Context mContext;
 
-    private NotesDataSource(Context context)
+    private NoteDataSource(Context context)
     {
-        mDatabase = new DatabaseHelper(context).getWritableDatabase();
+        mContext = context;
     }
 
-    public static NotesDataSource getInstance(Context context)
+    public static NoteDataSource getInstance(Context context)
     {
         if (sInstance == null)
         {
-            sInstance = new NotesDataSource(context);
+            sInstance = new NoteDataSource(context);
         }
         return sInstance;
     }
@@ -38,7 +37,12 @@ public class NotesDataSource
     public List<Notebook> getAllNotebooks()
     {
         List<Notebook> notebooks = new ArrayList<>();
-        Cursor cursor = mDatabase.query(DatabaseContract.NotebookEntry.TABLE_NAME, null, null, null, null, null, null);
+        Cursor cursor = mContext.getContentResolver().query(
+                DatabaseContract.NotebookEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
 
         try
         {
@@ -64,12 +68,10 @@ public class NotesDataSource
     {
         String selection = DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY + " = '" + notebook.getId() + "'";
 
-        Cursor cursor = mDatabase.query(
-                DatabaseContract.NoteEntry.TABLE_NAME,
+        Cursor cursor = mContext.getContentResolver().query(
+                DatabaseContract.NoteEntry.CONTENT_URI,
                 null,
                 selection,
-                null,
-                null,
                 null,
                 null
         );
@@ -83,10 +85,8 @@ public class NotesDataSource
     {
         List<Note> notes = new ArrayList<>();
 
-        Cursor cursor = mDatabase.query(
-                DatabaseContract.NoteEntry.TABLE_NAME,
-                null,
-                null,
+        Cursor cursor = mContext.getContentResolver().query(
+                DatabaseContract.NoteEntry.CONTENT_URI,
                 null,
                 null,
                 null,
@@ -124,12 +124,10 @@ public class NotesDataSource
         List<Note> notes = new ArrayList<>();
         String selection = DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY + " = '" + notebook.getId() + "'";
 
-        Cursor cursor = mDatabase.query(
-                DatabaseContract.NoteEntry.TABLE_NAME,
+        Cursor cursor = mContext.getContentResolver().query(
+                DatabaseContract.NoteEntry.CONTENT_URI,
                 null,
                 selection,
-                null,
-                null,
                 null,
                 DatabaseContract.NoteEntry.COLUMN_UPDATED_AT + " DESC");
 
@@ -163,7 +161,12 @@ public class NotesDataSource
     public List<Tag> getAllTags()
     {
         List<Tag> tags = new ArrayList<>();
-        Cursor cursor = mDatabase.query(DatabaseContract.TagEntry.TABLE_NAME, null, null, null, null, null, null);
+        Cursor cursor = mContext.getContentResolver().query(
+                DatabaseContract.TagEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
 
         try
         {
@@ -185,19 +188,17 @@ public class NotesDataSource
         return tags;
     }
 
-    public void createNotebook(Notebook notebook)
+    public void insertNotebook(Notebook notebook)
     {
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.NotebookEntry.COLUMN_ID, notebook.getId());
         values.put(DatabaseContract.NotebookEntry.COLUMN_TITLE, notebook.getTitle());
 
-        mDatabase.insert(DatabaseContract.NotebookEntry.TABLE_NAME, null, values);
+        mContext.getContentResolver().insert(DatabaseContract.NotebookEntry.CONTENT_URI, values);
     }
 
-    public void createNote(Note note)
+    public void insertNote(Note note)
     {
-        deleteNote(note); // deletes note if it already exists in database
-
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.NoteEntry.COLUMN_ID, note.getId());
         values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, note.getTitle());
@@ -205,39 +206,40 @@ public class NotesDataSource
         values.put(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT, DatabaseHelper.getDateTime(note.getUpdatedAt()));
         values.put(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY, note.getNotebookId());
 
-        mDatabase.insert(DatabaseContract.NoteEntry.TABLE_NAME, null, values);
+        mContext.getContentResolver().insert(DatabaseContract.NoteEntry.CONTENT_URI, values);
     }
 
-    public void createTag(Tag tag)
+    public void insertTag(Tag tag)
     {
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.NoteEntry.COLUMN_ID, tag.getId());
         values.put(DatabaseContract.TagEntry.COLUMN_TITLE, tag.getTitle());
 
-        mDatabase.insert(DatabaseContract.TagEntry.TABLE_NAME, null, values);
+        mContext.getContentResolver().insert(DatabaseContract.TagEntry.CONTENT_URI, values);
     }
 
     public void deleteAllNotebooks()
     {
-        mDatabase.delete(DatabaseContract.NotebookEntry.TABLE_NAME, null, null);
+        mContext.getContentResolver().delete(DatabaseContract.NotebookEntry.CONTENT_URI, null, null);
     }
 
     public void deleteNote(Note note)
     {
         String whereClause = DatabaseContract.NoteEntry.COLUMN_ID + " = '" + note.getId() + "'";
-        mDatabase.delete(DatabaseContract.NoteEntry.TABLE_NAME,
+        mContext.getContentResolver().delete(
+                DatabaseContract.NoteEntry.CONTENT_URI,
                 whereClause,
                 null);
     }
 
     public void deleteAllNotes()
     {
-        mDatabase.delete(DatabaseContract.NoteEntry.TABLE_NAME, null, null);
+        mContext.getContentResolver().delete(DatabaseContract.NoteEntry.CONTENT_URI, null, null);
     }
 
     public void deleteAllTags()
     {
-        mDatabase.delete(DatabaseContract.TagEntry.TABLE_NAME, null, null);
+        mContext.getContentResolver().delete(DatabaseContract.TagEntry.CONTENT_URI, null, null);
     }
 
     public void deleteAll()

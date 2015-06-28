@@ -28,7 +28,7 @@ import rocks.paperwork.adapters.NotesAdapter.Note;
 import rocks.paperwork.adapters.Tag;
 import rocks.paperwork.data.DatabaseHelper;
 import rocks.paperwork.data.HostPreferences;
-import rocks.paperwork.data.NotesDataSource;
+import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.fragments.NotebooksFragment;
 import rocks.paperwork.fragments.NotesFragment;
 
@@ -124,8 +124,8 @@ public class SyncNotesTask
     private void parseAllNotebooks(String jsonStr)
     {
         List<Notebook> notebooks = new LinkedList<>();
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(mContext);
-        notesDataSource.deleteAllNotes();
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(mContext);
+        noteDataSource.deleteAllNotes();
 
         try
         {
@@ -204,8 +204,8 @@ public class SyncNotesTask
 
     private void storeNote(Note note)
     {
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(mContext);
-        notesDataSource.createNote(note);
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(mContext);
+        noteDataSource.insertNote(note);
     }
 
     private void parseAllTags(String jsonStr)
@@ -238,12 +238,12 @@ public class SyncNotesTask
 
     private void storeAllNotebooks(List<Notebook> notebooks)
     {
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(mContext);
-        notesDataSource.deleteAllNotebooks();
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(mContext);
+        noteDataSource.deleteAllNotebooks();
 
         for (Notebook notebook : notebooks)
         {
-            notesDataSource.createNotebook(notebook);
+            noteDataSource.insertNotebook(notebook);
         }
 
         if (NotebooksFragment.getInstance() != null)
@@ -254,12 +254,12 @@ public class SyncNotesTask
 
     private void storeAllTags(List<Tag> tags)
     {
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(mContext);
-        notesDataSource.deleteAllTags();
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(mContext);
+        noteDataSource.deleteAllTags();
 
         for (Tag tag : tags)
         {
-            notesDataSource.createTag(tag);
+            noteDataSource.insertTag(tag);
         }
 
         if (MainActivity.getInstance() != null)
@@ -545,7 +545,7 @@ public class SyncNotesTask
                 }
                 else if (mTask == ModifyNote.delete_note)
                 {
-                    NotesDataSource.getInstance(mContext).deleteNote(mNote);
+                    NoteDataSource.getInstance(mContext).deleteNote(mNote);
                 }
 
                 if (NotesFragment.getInstance() != null)
