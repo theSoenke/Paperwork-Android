@@ -42,7 +42,7 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         notebookTitle.setText(notebook.getTitle());
 
         String noteText;
-        if(notebookCount == 0 || notebookCount > 1)
+        if (notebookCount == 0 || notebookCount > 1)
         {
             noteText = mContext.getString(R.string.notes);
         }
@@ -50,7 +50,7 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         {
             noteText = mContext.getString(R.string.note);
         }
-        notebookCountText.setText(Integer.toString(notebookCount) + " " +  noteText);
+        notebookCountText.setText(Integer.toString(notebookCount) + " " + noteText);
 
         return rowView;
     }

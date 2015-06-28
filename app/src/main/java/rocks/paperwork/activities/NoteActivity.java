@@ -20,7 +20,7 @@ import android.widget.EditText;
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
-import rocks.paperwork.network.SyncNotesTask;
+import rocks.paperwork.sync.SyncNotesTask;
 
 public class NoteActivity extends AppCompatActivity
 {

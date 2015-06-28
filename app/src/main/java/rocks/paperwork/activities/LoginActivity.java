@@ -38,11 +38,7 @@ import rocks.paperwork.data.HostPreferences;
  */
 public class LoginActivity extends Activity
 {
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-    // UI references.
+    private UserLoginTask mAuthTask = null; // Keep track of the login task to ensure we can cancel it if requested.
     private TextInputLayout mHostView;
     private TextInputLayout mEmailView;
     private TextInputLayout mPasswordView;
@@ -246,8 +242,6 @@ public class LoginActivity extends Activity
                 urlConnection.setReadTimeout(10000);
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
-
-                urlConnection.getInputStream();
             }
             catch (SocketTimeoutException e)
             {
@@ -317,7 +311,107 @@ public class LoginActivity extends Activity
         }
     }
 
-    private void showTimeoutDialog()
+    /**
+     * Represents an asynchronous login/registration task used to authenticate
+     * the user.
+     */
+    public class UserLoginTask extends AsyncTask<String, Void, Integer>
+    {
+        private final String LOG_TAG = UserLoginTask.class.getName();
+        private final String mHash;
+
+        private final int SUCCESS = 0;
+        private final int CONNECTION_FAILED = 1;
+        private final int FILE_NOT_FOUND = 2;
+        private final int IO_EXCEPTION = 3;
+
+        public UserLoginTask(String hash)
+        {
+            mHash = hash;
+        }
+
+        @Override
+        protected Integer doInBackground(String... params)
+        {
+            HttpURLConnection urlConnection = null;
+
+            try
+            {
+                URL url = new URL(params[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestProperty("Authorization", "Basic " + mHash);
+                urlConnection.setConnectTimeout(5000);
+                urlConnection.setReadTimeout(10000);
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+            }
+            catch (SocketTimeoutException e)
+            {
+                Log.d(LOG_TAG, "Timeout");
+                return CONNECTION_FAILED;
+            }
+            catch (ConnectException e)
+            {
+                Log.d(LOG_TAG, "Failed to connect");
+                return CONNECTION_FAILED;
+            }
+            catch (FileNotFoundException e)
+            {
+                return FILE_NOT_FOUND;
+            }
+            catch (SSLHandshakeException e)
+            {
+                Log.d(LOG_TAG, "SSL Certificate is not valid");
+                return CONNECTION_FAILED;
+            }
+            catch (IOException e)
+            {
+                Log.e(LOG_TAG, "IO Exception", e);
+                return IO_EXCEPTION;
+            }
+            finally
+            {
+                if (urlConnection != null)
+                {
+                    urlConnection.disconnect();
+                }
+            }
+
+            return SUCCESS;
+        }
+
+        @Override
+        protected void onPostExecute(final Integer result)
+        {
+            if (result == SUCCESS)
+            {
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+            else if (result == FILE_NOT_FOUND)
+            {
+                HostPreferences.clearPreferences(LoginActivity.this);
+                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.requestFocus();
+            }
+            else
+            {
+                HostPreferences.clearPreferences(LoginActivity.this);
+                showTimeoutDialog();
+            }
+
+            mAuthTask = null;
+            showProgress(false);
+        }
+
+        @Override
+        protected void onCancelled()
+        {
+            mAuthTask = null;
+            showProgress(false);
+        }
+    }    private void showTimeoutDialog()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.connection_error).setMessage(R.string.connection_error_message)

@@ -23,7 +23,7 @@ import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.fragments.NotebooksFragment;
 import rocks.paperwork.fragments.NotesFragment;
 import rocks.paperwork.interfaces.AsyncCallback;
-import rocks.paperwork.network.SyncNotesTask;
+import rocks.paperwork.sync.SyncAdapter;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
-        new SyncNotesTask(this).fetchAllData();
+        SyncAdapter.syncImmediately(this);
     }
 
     private void setUpToolbar()
@@ -192,8 +192,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     {
         HostPreferences.clearPreferences(this);
         NoteDataSource.getInstance(this).deleteAll();
-        Intent hostMenuIntent = new Intent(this, LoginActivity.class);
-        startActivity(hostMenuIntent);
+        Intent loginIntent = new Intent(this, LoginActivity.class);
+        startActivity(loginIntent);
         finish();
     }
 

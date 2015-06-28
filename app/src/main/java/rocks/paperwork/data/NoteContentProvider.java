@@ -10,14 +10,27 @@ import android.support.annotation.NonNull;
 
 public class NoteContentProvider extends ContentProvider
 {
-    private static final UriMatcher sUriMatcher = buildUriMatcher();
-    private DatabaseHelper mOpenHelper;
-
     public static final int NOTES = 100;
     public static final int NOTES_FROM_NOTEBOOK = 101;
     public static final int NOTES_WITH_TAG = 102;
     public static final int NOTEBOOKS = 200;
     public static final int TAGS = 300;
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
+    private DatabaseHelper mOpenHelper;
+
+    static UriMatcher buildUriMatcher()
+    {
+        final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+        final String authority = DatabaseContract.CONTENT_AUTHORITY;
+
+        matcher.addURI(authority, DatabaseContract.PATH_NOTES, NOTES);
+        matcher.addURI(authority, DatabaseContract.PATH_NOTES + "/*", NOTES_FROM_NOTEBOOK);
+        matcher.addURI(authority, DatabaseContract.PATH_NOTES + "/*", NOTES_WITH_TAG);
+        matcher.addURI(authority, DatabaseContract.PATH_NOTEBOOKS, NOTEBOOKS);
+        matcher.addURI(authority, DatabaseContract.PATH_TAGS, TAGS);
+
+        return matcher;
+    }
 
     @Override
     public boolean onCreate()
@@ -199,12 +212,14 @@ public class NoteContentProvider extends ContentProvider
                 {
                     for (ContentValues value : values)
                     {
-                        long _id = db.insert(DatabaseContract.NoteEntry.TABLE_NAME, null, value);
+
+                        long _id = db.replace(DatabaseContract.NoteEntry.TABLE_NAME, null, value);
                         if (_id != -1)
                         {
                             returnCount++;
                         }
                     }
+                    db.setTransactionSuccessful();
                 }
                 finally
                 {
@@ -219,12 +234,13 @@ public class NoteContentProvider extends ContentProvider
                 {
                     for (ContentValues value : values)
                     {
-                        long _id = db.insert(DatabaseContract.TagEntry.TABLE_NAME, null, value);
+                        long _id = db.replace(DatabaseContract.NotebookEntry.TABLE_NAME, null, value);
                         if (_id != -1)
                         {
                             returnCount++;
                         }
                     }
+                    db.setTransactionSuccessful();
                 }
                 finally
                 {
@@ -239,12 +255,13 @@ public class NoteContentProvider extends ContentProvider
                 {
                     for (ContentValues value : values)
                     {
-                        long _id = db.insert(DatabaseContract.TagEntry.TABLE_NAME, null, value);
+                        long _id = db.replace(DatabaseContract.TagEntry.TABLE_NAME, null, value);
                         if (_id != -1)
                         {
                             returnCount++;
                         }
                     }
+                    db.setTransactionSuccessful();
                 }
                 finally
                 {
@@ -260,6 +277,7 @@ public class NoteContentProvider extends ContentProvider
         {
             getContext().getContentResolver().notifyChange(uri, null);
         }
+
         return returnCount;
     }
 
@@ -293,7 +311,7 @@ public class NoteContentProvider extends ContentProvider
                 break;
             }
             default:
-                throw new UnsupportedOperationException("Unknow uri: " + uri);
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         if (rowsDeleted != 0)
@@ -336,19 +354,5 @@ public class NoteContentProvider extends ContentProvider
             getContext().getContentResolver().notifyChange(uri, null);
         }
         return rowsUpdated;
-    }
-
-    static UriMatcher buildUriMatcher()
-    {
-        final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        final String authority = DatabaseContract.CONTENT_AUTHORITY;
-
-        matcher.addURI(authority, DatabaseContract.PATH_NOTES, NOTES);
-        matcher.addURI(authority, DatabaseContract.PATH_NOTES + "/*", NOTES_FROM_NOTEBOOK);
-        matcher.addURI(authority, DatabaseContract.PATH_NOTES + "/*", NOTES_WITH_TAG);
-        matcher.addURI(authority, DatabaseContract.PATH_NOTEBOOKS, NOTEBOOKS);
-        matcher.addURI(authority, DatabaseContract.PATH_TAGS, TAGS);
-
-        return matcher;
     }
 }
