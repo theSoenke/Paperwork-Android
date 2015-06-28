@@ -15,7 +15,7 @@ import java.util.List;
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotebookAdapter;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
-import rocks.paperwork.data.NotesDataSource;
+import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.interfaces.AsyncCallback;
 
 
@@ -70,8 +70,8 @@ public class NotebooksFragment extends Fragment implements AsyncCallback
     {
         mNotebooksAdapter.clear();
 
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(getActivity());
-        List<Notebook> allNotebooks = notesDataSource.getAllNotebooks();
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
+        List<Notebook> allNotebooks = noteDataSource.getAllNotebooks();
         mNotebooksAdapter.addAll(allNotebooks);
     }
 }

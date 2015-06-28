@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import rocks.paperwork.R;
 import rocks.paperwork.data.HostPreferences;
-import rocks.paperwork.data.NotesDataSource;
+import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.fragments.NotebooksFragment;
 import rocks.paperwork.fragments.NotesFragment;
 import rocks.paperwork.interfaces.AsyncCallback;
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void logout()
     {
         HostPreferences.clearPreferences(this);
-        NotesDataSource.getInstance(this).deleteAll();
+        NoteDataSource.getInstance(this).deleteAll();
         Intent hostMenuIntent = new Intent(this, LoginActivity.class);
         startActivity(hostMenuIntent);
         finish();

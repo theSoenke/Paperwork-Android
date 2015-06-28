@@ -61,9 +61,9 @@ public class NoteActivity extends AppCompatActivity
             }
         });
 
-        if (getIntent().hasExtra("NOTE"))
+        if (getIntent().hasExtra("NOTES"))
         {
-            mNote = (NotesAdapter.Note) getIntent().getExtras().getSerializable("NOTE");
+            mNote = (NotesAdapter.Note) getIntent().getExtras().getSerializable("NOTES");
             mTextTitle.setText(mNote.getTitle());
 
             String content = mNote.getContent();

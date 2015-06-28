@@ -23,7 +23,7 @@ import rocks.paperwork.activities.NoteActivity;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
-import rocks.paperwork.data.NotesDataSource;
+import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.interfaces.AsyncCallback;
 import rocks.paperwork.network.SyncNotesTask;
 
@@ -125,16 +125,16 @@ public class NotesFragment extends Fragment implements AsyncCallback
         mSwipeContainer.setRefreshing(false);
         mNotesAdapter.clear();
 
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(getActivity());
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
         List<Note> allNotes;
 
         if (mNotebook != null)
         {
-            allNotes = notesDataSource.getAllNotesFromNotebook(mNotebook);
+            allNotes = noteDataSource.getAllNotesFromNotebook(mNotebook);
         }
         else
         {
-            allNotes = notesDataSource.getAllNotes();
+            allNotes = noteDataSource.getAllNotes();
         }
 
         mNotesAdapter.addAll(allNotes);
@@ -152,8 +152,8 @@ public class NotesFragment extends Fragment implements AsyncCallback
 
     private void showNotebookSelection()
     {
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(getActivity());
-        final List<Notebook> allNotebooks = notesDataSource.getAllNotebooks();
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
+        final List<Notebook> allNotebooks = noteDataSource.getAllNotebooks();
         CharSequence[] notebookChars = new CharSequence[allNotebooks.size()];
 
         for (int i = 0; i < allNotebooks.size(); i++)
@@ -185,7 +185,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
     private void viewNote(Note note, boolean editMode)
     {
         Intent viewNoteIntent = new Intent(getActivity(), NoteActivity.class);
-        viewNoteIntent.putExtra("NOTE", note);
+        viewNoteIntent.putExtra("NOTES", note);
         viewNoteIntent.putExtra("EditMode", editMode);
         startActivity(viewNoteIntent);
     }
