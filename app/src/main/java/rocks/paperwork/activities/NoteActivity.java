@@ -17,9 +17,14 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import java.util.Calendar;
+import java.util.UUID;
+
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
+import rocks.paperwork.data.DatabaseContract;
+import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.sync.SyncNotesTask;
 
 public class NoteActivity extends AppCompatActivity
@@ -251,25 +256,23 @@ public class NoteActivity extends AppCompatActivity
     {
         if (changesToSave())
         {
-            SyncNotesTask syncNotes = new SyncNotesTask(this);
-
             if (mNewNote)
             {
-                mNote = new Note("");
-                mNote.setTitle(mTextTitle.getText().toString());
-                mNote.setContent(mEditContent.getText().toString());
-
+                mNote = new Note(UUID.randomUUID().toString());
+                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_NOT_SYNCED);
                 String notebookId = (String) getIntent().getExtras().getSerializable("NotebookId");
                 mNote.setNotebookId(notebookId);
-                syncNotes.createNote(mNote);
             }
             else
             {
-                mNote.setTitle(mTextTitle.getText().toString());
-                mNote.setContent(mEditContent.getText().toString());
-
-                syncNotes.updateNote(mNote);
+                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_EDITED);
             }
+
+            mNote.setTitle(mTextTitle.getText().toString());
+            mNote.setContent(mEditContent.getText().toString());
+            mNote.setUpdatedAt(Calendar.getInstance().getTime());
+
+            NoteDataSource.getInstance(this).insertNote(mNote);
         }
     }
 

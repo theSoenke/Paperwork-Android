@@ -21,8 +21,14 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
@@ -209,106 +215,19 @@ public class LoginActivity extends Activity
         }
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<String, Void, Integer>
+    private void showTimeoutDialog()
     {
-        private final String LOG_TAG = UserLoginTask.class.getName();
-        private final String mHash;
-
-        private final int SUCCESS = 0;
-        private final int CONNECTION_FAILED = 1;
-        private final int FILE_NOT_FOUND = 2;
-        private final int IO_EXCEPTION = 3;
-
-        public UserLoginTask(String hash)
-        {
-            mHash = hash;
-        }
-
-        @Override
-        protected Integer doInBackground(String... params)
-        {
-            HttpURLConnection urlConnection = null;
-
-            try
-            {
-                URL url = new URL(params[0]);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("Authorization", "Basic " + mHash);
-                urlConnection.setConnectTimeout(5000);
-                urlConnection.setReadTimeout(10000);
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-            }
-            catch (SocketTimeoutException e)
-            {
-                Log.d(LOG_TAG, "Timeout");
-                return CONNECTION_FAILED;
-            }
-            catch (ConnectException e)
-            {
-                Log.d(LOG_TAG, "Failed to connect");
-                return CONNECTION_FAILED;
-            }
-            catch (FileNotFoundException e)
-            {
-                return FILE_NOT_FOUND;
-            }
-            catch (SSLHandshakeException e)
-            {
-                Log.d(LOG_TAG, "SSL Certificate is not valid");
-                return CONNECTION_FAILED;
-            }
-            catch (IOException e)
-            {
-                Log.e(LOG_TAG, "IO Exception", e);
-                return IO_EXCEPTION;
-            }
-            finally
-            {
-                if (urlConnection != null)
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.connection_error).setMessage(R.string.connection_error_message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
                 {
-                    urlConnection.disconnect();
-                }
-            }
-
-            return SUCCESS;
-        }
-
-        @Override
-        protected void onPostExecute(final Integer result)
-        {
-            if (result == SUCCESS)
-            {
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-            else if (result == FILE_NOT_FOUND)
-            {
-                HostPreferences.clearPreferences(LoginActivity.this);
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-            else
-            {
-                HostPreferences.clearPreferences(LoginActivity.this);
-                showTimeoutDialog();
-            }
-
-            mAuthTask = null;
-            showProgress(false);
-        }
-
-        @Override
-        protected void onCancelled()
-        {
-            mAuthTask = null;
-            showProgress(false);
-        }
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     /**
@@ -334,16 +253,39 @@ public class LoginActivity extends Activity
         protected Integer doInBackground(String... params)
         {
             HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String jsonStr = "";
 
             try
             {
                 URL url = new URL(params[0]);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestProperty("Authorization", "Basic " + mHash);
-                urlConnection.setConnectTimeout(5000);
-                urlConnection.setReadTimeout(10000);
+                urlConnection.setConnectTimeout(10000);
+                urlConnection.setReadTimeout(20000);
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
+
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuilder builder = new StringBuilder();
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null)
+                {
+                    builder.append(line).append("\n");
+                }
+                jsonStr = builder.toString();
+
+                JSONObject result = new JSONObject(jsonStr);
+                if (result.getBoolean("success"))
+                {
+                    return SUCCESS;
+                }
+                else
+                {
+                    return FILE_NOT_FOUND;
+                }
             }
             catch (SocketTimeoutException e)
             {
@@ -357,12 +299,18 @@ public class LoginActivity extends Activity
             }
             catch (FileNotFoundException e)
             {
+                Log.d(LOG_TAG, "FileNotFoundException");
                 return FILE_NOT_FOUND;
             }
             catch (SSLHandshakeException e)
             {
                 Log.d(LOG_TAG, "SSL Certificate is not valid");
                 return CONNECTION_FAILED;
+            }
+            catch (JSONException e)
+            {
+                Log.d(LOG_TAG, "Error parsing JSON");
+                return FILE_NOT_FOUND;
             }
             catch (IOException e)
             {
@@ -376,8 +324,6 @@ public class LoginActivity extends Activity
                     urlConnection.disconnect();
                 }
             }
-
-            return SUCCESS;
         }
 
         @Override
@@ -411,19 +357,6 @@ public class LoginActivity extends Activity
             mAuthTask = null;
             showProgress(false);
         }
-    }    private void showTimeoutDialog()
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.connection_error).setMessage(R.string.connection_error_message)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i)
-                    {
-                    }
-                });
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 }
 

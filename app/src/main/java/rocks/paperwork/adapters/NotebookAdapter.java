@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import rocks.paperwork.R;
@@ -60,6 +61,7 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         public static final String DEFAULT_ID = "00000000-0000-0000-0000-000000000000";
         private final String mId;
         private String mTitle;
+        private Date mUpdatedAt;
 
         public Notebook(String id)
         {
@@ -80,5 +82,16 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         {
             return mId;
         }
+
+        public Date getUpdatedAt()
+        {
+            return mUpdatedAt;
+        }
+
+        public void setUpdatedAt(Date date)
+        {
+            mUpdatedAt = date;
+        }
+
     }
 }

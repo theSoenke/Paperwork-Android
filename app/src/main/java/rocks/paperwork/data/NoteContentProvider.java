@@ -151,7 +151,6 @@ public class NoteContentProvider extends ContentProvider
         {
             case NOTES:
             {
-
                 long _id = db.replace(DatabaseContract.NoteEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0)
                 {
@@ -161,6 +160,7 @@ public class NoteContentProvider extends ContentProvider
                 {
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
                 }
+
                 break;
             }
             case NOTEBOOKS:
@@ -192,6 +192,7 @@ public class NoteContentProvider extends ContentProvider
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
+
         getContext().getContentResolver().notifyChange(uri, null);
         return returnUri;
     }

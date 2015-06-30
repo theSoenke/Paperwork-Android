@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import rocks.paperwork.R;
+import rocks.paperwork.data.DatabaseContract;
 
 public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
 {
@@ -62,16 +63,16 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
 
     public static class Note implements Serializable
     {
-        private final String mId;
+        private String mId;
         private String mTitle;
         private String mContent;
         private String mNotebookId;
         private Date mUpdatedAt;
+        private int mSyncStatus;
 
-
-        public Note(String id)
+        public Note(String uuid)
         {
-            mId = id;
+            mId = uuid;
         }
 
         public String getId()
@@ -123,6 +124,25 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         public void setUpdatedAt(Date date)
         {
             mUpdatedAt = date;
+        }
+
+        public int getSyncStatus()
+        {
+            return mSyncStatus;
+        }
+
+        public void setSyncStatus(int status)
+        {
+            if (status == DatabaseContract.NoteEntry.NOTE_NOT_SYNCED ||
+                    status == DatabaseContract.NoteEntry.NOTE_EDITED ||
+                    status == DatabaseContract.NoteEntry.NOTE_SYNCED)
+            {
+                mSyncStatus = status;
+            }
+            else
+            {
+                throw new UnsupportedOperationException("Unknown Sync Status: " + status);
+            }
         }
     }
 }
