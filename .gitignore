@@ -8,8 +8,7 @@ build/
 *.ipr
 *.iws
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
+/.idea
 
 .DS_Store
 Thumbs.db
