@@ -81,15 +81,16 @@ public class NoteDataSource
         return count;
     }
 
-    public List<Note> getAllNotes(boolean notSyncedNotes)
+    public List<Note> getAllNotes(DatabaseContract.NoteEntry.NOTE_STATUS status)
     {
         List<Note> notes = new ArrayList<>();
 
-        String selection = null;
+        String selection = DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS + " = "
+                + status.ordinal();
 
-        if (notSyncedNotes)
+        if(status == DatabaseContract.NoteEntry.NOTE_STATUS.all)
         {
-            selection = DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS + " = 0";
+            selection = null;
         }
 
         Cursor cursor = mContext.getContentResolver().query(
@@ -115,7 +116,7 @@ public class NoteDataSource
                 note.setContent(cursor.getString(contentColumn));
                 Date date = DatabaseHelper.getDateTime(cursor.getString(updatedAtColumn));
                 note.setUpdatedAt(date);
-                note.setSyncStatus(cursor.getInt(syncColumn));
+                note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.values()[cursor.getInt(syncColumn)]);
                 note.setNotebookId(cursor.getString(notebookColumn));
                 notes.add(note);
             }
@@ -155,7 +156,7 @@ public class NoteDataSource
                 note.setContent(cursor.getString(contentColumn));
                 Date date = DatabaseHelper.getDateTime(cursor.getString(updatedAtColumn));
                 note.setUpdatedAt(date);
-                note.setSyncStatus(cursor.getInt(syncColumn));
+                note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.values()[cursor.getInt(syncColumn)]);
                 note.setNotebookId(cursor.getString(notebookColumn));
                 notes.add(note);
             }
@@ -231,7 +232,7 @@ public class NoteDataSource
         values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, note.getTitle());
         values.put(DatabaseContract.NoteEntry.COLUMN_CONTENT, note.getContent());
         values.put(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT, DatabaseHelper.getDateTime(note.getUpdatedAt()));
-        values.put(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS, note.getSyncStatus());
+        values.put(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS, note.getSyncStatus().ordinal());
         values.put(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY, note.getNotebookId());
 
         mContext.getContentResolver().insert(DatabaseContract.NoteEntry.CONTENT_URI, values);
@@ -250,7 +251,7 @@ public class NoteDataSource
             values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, note.getTitle());
             values.put(DatabaseContract.NoteEntry.COLUMN_CONTENT, note.getContent());
             values.put(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT, DatabaseHelper.getDateTime(note.getUpdatedAt()));
-            values.put(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS, note.getSyncStatus());
+            values.put(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS, note.getSyncStatus().ordinal());
             values.put(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY, note.getNotebookId());
 
             contentValues[i] = values;

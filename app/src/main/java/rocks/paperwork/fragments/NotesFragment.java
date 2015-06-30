@@ -139,18 +139,18 @@ public class NotesFragment extends Fragment implements AsyncCallback
         mNotesAdapter.clear();
 
         NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
-        List<Note> allNotes;
+        List<Note> notes;
 
         if (mNotebook != null)
         {
-            allNotes = noteDataSource.getAllNotesFromNotebook(mNotebook);
+            notes = noteDataSource.getAllNotesFromNotebook(mNotebook);
         }
         else
         {
-            allNotes = noteDataSource.getAllNotes(false);
+            notes = noteDataSource.getAllNotes(DatabaseContract.NoteEntry.NOTE_STATUS.all);
         }
 
-        mNotesAdapter.addAll(allNotes);
+        mNotesAdapter.addAll(notes);
 
         if (mNotesAdapter.isEmpty())
         {

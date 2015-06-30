@@ -68,7 +68,7 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         private String mContent;
         private String mNotebookId;
         private Date mUpdatedAt;
-        private int mSyncStatus;
+        private DatabaseContract.NoteEntry.NOTE_STATUS mSyncStatus;
 
         public Note(String uuid)
         {
@@ -126,23 +126,14 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
             mUpdatedAt = date;
         }
 
-        public int getSyncStatus()
+        public DatabaseContract.NoteEntry.NOTE_STATUS getSyncStatus()
         {
             return mSyncStatus;
         }
 
-        public void setSyncStatus(int status)
+        public void setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS status)
         {
-            if (status == DatabaseContract.NoteEntry.NOTE_NOT_SYNCED ||
-                    status == DatabaseContract.NoteEntry.NOTE_EDITED ||
-                    status == DatabaseContract.NoteEntry.NOTE_SYNCED)
-            {
-                mSyncStatus = status;
-            }
-            else
-            {
-                throw new UnsupportedOperationException("Unknown Sync Status: " + status);
-            }
+            mSyncStatus = status;
         }
     }
 }

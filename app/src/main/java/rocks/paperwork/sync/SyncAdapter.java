@@ -7,7 +7,6 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -92,7 +91,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         String host = HostPreferences.readSharedSetting(getContext(), HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(getContext(), HostPreferences.HASH, "");
 
-        uploadLocalNotes(host, hash);
+        uploadNotes(host, hash);
         fetch(host, hash, NoteData.notebooks);
         fetch(host, hash, NoteData.notes);
         fetch(host, hash, NoteData.tags);
@@ -133,13 +132,25 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         }
     }
 
-    private void uploadLocalNotes(String host, String hash)
+    private void uploadNotes(String host, String hash)
     {
         // uploads not yet synced notes
         NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
-        List<Note> notSyncedNotes = dataSource.getAllNotes(true);
+        List<Note> notSyncedNotes = dataSource.getAllNotes(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
 
         for (Note note : notSyncedNotes)
+        {
+            Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes", hash, note, ModifyNote.create_note);
+            if (newNote != null)
+            {
+                dataSource.deleteNote(note);
+                dataSource.insertNote(newNote);
+            }
+        }
+
+        List<Note> editedNotes = dataSource.getAllNotes(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
+
+        for (Note note : editedNotes)
         {
             Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes", hash, note, ModifyNote.create_note);
             if (newNote != null)
@@ -170,7 +181,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             note.setTitle(title);
             note.setContent(content);
             note.setUpdatedAt(date);
-            note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_SYNCED);
+            note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
         }
         catch (JSONException e)
         {
