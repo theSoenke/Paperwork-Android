@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,19 +16,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 import rocks.paperwork.activities.MainActivity;
-import rocks.paperwork.adapters.NotebookAdapter.Notebook;
-import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
-import rocks.paperwork.adapters.Tag;
-import rocks.paperwork.data.DatabaseHelper;
 import rocks.paperwork.data.HostPreferences;
 import rocks.paperwork.data.NoteDataSource;
-import rocks.paperwork.fragments.NotebooksFragment;
 import rocks.paperwork.fragments.NotesFragment;
 
 /**
@@ -47,174 +38,12 @@ public class SyncNotesTask
         mContext = context;
     }
 
-    public void createNote(Note note)
-    {
-        String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
-        String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new ModifyNoteTask(note, hash, ModifyNote.create_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes");
-    }
-
-    public void updateNote(Note note)
-    {
-        // FIXME will fail when try to update a shared note from another user
-        String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
-        String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
-        new ModifyNoteTask(note, hash, ModifyNote.update_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
-    }
-
     public void deleteNote(Note note)
     {
         // FIXME will fail when try to delete a shared note from another user
         String host = HostPreferences.readSharedSetting(mContext, HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(mContext, HostPreferences.HASH, "");
         new ModifyNoteTask(note, hash, ModifyNote.delete_note).execute(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId());
-    }
-
-    private void parseAllNotebooks(String jsonStr)
-    {
-        List<Notebook> notebooks = new LinkedList<>();
-        NoteDataSource noteDataSource = NoteDataSource.getInstance(mContext);
-        noteDataSource.deleteAllNotes();
-
-        try
-        {
-            JSONObject jsonData = new JSONObject(jsonStr);
-            JSONArray jsonNotebooks = jsonData.getJSONArray("response");
-
-            for (int i = 0; i < jsonNotebooks.length(); i++)
-            {
-                JSONObject notebookJson = jsonNotebooks.getJSONObject(i);
-                String id = notebookJson.getString("id");
-                String title = notebookJson.getString("title");
-
-                if (!id.equals(Notebook.DEFAULT_ID))
-                {
-                    Notebook notebook = new Notebook(id);
-                    notebook.setTitle(title);
-                    notebooks.add(notebook);
-                }
-            }
-        }
-        catch (JSONException e)
-        {
-            Log.e(LOG_TAG, "Error parsing JSON" + jsonStr, e);
-        }
-
-        storeAllNotebooks(notebooks);
-    }
-
-    private void parseAllNotes(String jsonStr)
-    {
-        JSONObject jsonData;
-        try
-        {
-            jsonData = new JSONObject(jsonStr);
-
-            JSONArray jsonNotes = jsonData.getJSONArray("response");
-
-            for (int i = 0; i < jsonNotes.length(); i++)
-            {
-                JSONObject jsonNote = jsonNotes.getJSONObject(i);
-                parseNote(jsonNote);
-            }
-        }
-        catch (JSONException e)
-        {
-            Log.e(LOG_TAG, "Error parsing JSON");
-        }
-    }
-
-    private void parseNote(JSONObject jsonNote)
-    {
-        JSONObject version;
-        try
-        {
-            version = jsonNote.getJSONObject("version");
-
-            String id = jsonNote.getString("id");
-            String title = version.getString("title");
-            String content = version.getString("content");
-            Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
-            String notebookId = jsonNote.getString("notebook_id");
-
-            Note note = new NotesAdapter.Note(id);
-            note.setNotebookId(notebookId);
-            note.setTitle(title);
-            note.setContent(content);
-            note.setUpdatedAt(date);
-
-            storeNote(note);
-        }
-        catch (JSONException e)
-        {
-            Log.e(LOG_TAG, "Error parsing JSON " + jsonNote, e);
-        }
-    }
-
-    private void storeNote(Note note)
-    {
-        NoteDataSource noteDataSource = NoteDataSource.getInstance(mContext);
-        noteDataSource.insertNote(note);
-    }
-
-    private void parseAllTags(String jsonStr)
-    {
-        List<Tag> tags = new LinkedList<>();
-
-        try
-        {
-            JSONObject jsonData = new JSONObject(jsonStr);
-            JSONArray jsonTags = jsonData.getJSONArray("response");
-
-            for (int i = 0; i < jsonTags.length(); i++)
-            {
-                JSONObject tagJson = jsonTags.getJSONObject(i);
-                String id = tagJson.getString("id");
-                String title = tagJson.getString("title");
-
-                Tag tag = new Tag(id);
-                tag.setTitle(title);
-                tags.add(tag);
-            }
-        }
-        catch (JSONException e)
-        {
-            Log.e(LOG_TAG, "Error parsing Json" + jsonStr);
-        }
-
-        storeAllTags(tags);
-    }
-
-    private void storeAllNotebooks(List<Notebook> notebooks)
-    {
-        NoteDataSource noteDataSource = NoteDataSource.getInstance(mContext);
-        noteDataSource.deleteAllNotebooks();
-
-        for (Notebook notebook : notebooks)
-        {
-            noteDataSource.insertNotebook(notebook);
-        }
-
-        if (NotebooksFragment.getInstance() != null)
-        {
-            NotebooksFragment.getInstance().updateView();
-        }
-    }
-
-    private void storeAllTags(List<Tag> tags)
-    {
-        NoteDataSource noteDataSource = NoteDataSource.getInstance(mContext);
-        noteDataSource.deleteAllTags();
-
-        for (Tag tag : tags)
-        {
-            noteDataSource.insertTag(tag);
-        }
-
-        if (MainActivity.getInstance() != null)
-        {
-            MainActivity.getInstance().updateView();
-        }
     }
 
     private void authenticationFailed()
@@ -363,33 +192,14 @@ public class SyncNotesTask
         {
             super.onPostExecute(result);
 
-            try
+            if (mTask == ModifyNote.delete_note)
             {
-                if (mTask == ModifyNote.create_note)
-                {
-                    JSONObject jsonNote = new JSONObject(result).getJSONObject("response");
-                    parseNote(jsonNote);
-                }
-                else if (mTask == ModifyNote.update_note)
-                {
-                    JSONObject jsonNote = new JSONObject(result).getJSONObject("response");
-                    Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
-                    mNote.setUpdatedAt(date);
-                    storeNote(mNote);
-                }
-                else if (mTask == ModifyNote.delete_note)
-                {
-                    NoteDataSource.getInstance(mContext).deleteNote(mNote);
-                }
-
-                if (NotesFragment.getInstance() != null)
-                {
-                    NotesFragment.getInstance().updateView();
-                }
+                NoteDataSource.getInstance(mContext).deleteNote(mNote);
             }
-            catch (JSONException e)
+
+            if (NotesFragment.getInstance() != null)
             {
-                Log.e(LOG_TAG, "Error parsing JSON");
+                NotesFragment.getInstance().updateView();
             }
         }
     }

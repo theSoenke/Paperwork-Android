@@ -19,6 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -31,6 +33,7 @@ import rocks.paperwork.adapters.NotebookAdapter.Notebook;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
 import rocks.paperwork.adapters.Tag;
+import rocks.paperwork.data.DatabaseContract;
 import rocks.paperwork.data.DatabaseHelper;
 import rocks.paperwork.data.HostPreferences;
 import rocks.paperwork.data.NoteDataSource;
@@ -44,11 +47,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         super(context, autoInitialize);
     }
 
-    /**
-     * sync notes immediately
-     *
-     * @param context
-     */
     public static void syncImmediately(Context context)
     {
         Bundle bundle = new Bundle();
@@ -93,20 +91,86 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         String host = HostPreferences.readSharedSetting(getContext(), HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(getContext(), HostPreferences.HASH, "");
 
-        // TODO compare remote and local data and syncchronize both
+        // TODO synchronize local and remote data
+        syncNotes(host, hash);
+        syncNotebooks(host, hash);
+        syncTags(host, hash);
+    }
 
-        String url = host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes";
-        String result = fetchTask(url, hash);
-        List<Note> remoteNotes = parseNotes(result);
-        NoteDataSource.getInstance(getContext()).bulkInsertNotes(remoteNotes);
+    private void syncNotes(String host, String hash)
+    {
+        NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
 
-        url = host + "/api/v1/notebooks/";
-        result = fetchTask(url, hash);
+        // uploads not yet synced notes
+        List<Note> notSyncedNotes = dataSource.getAllNotes(true);
+
+        for (Note note : notSyncedNotes)
+        {
+            Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes", hash, note, ModifyNote.create_note);
+            if (newNote != null)
+            {
+                dataSource.deleteNote(note);
+                dataSource.insertNote(newNote);
+            }
+        }
+
+        String result = fetchTask(host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes", hash);
+        List<Note> allNotes = parseNotes(result);
+
+        dataSource.bulkInsertNotes(allNotes);
+
+        // TODO synchronize local and remote notes
+        /*List<Note> remoteNotes = parseNotes(result);
+        List<Note> localNotes = dataSource.getAllNotes(false);
+
+        List<Note> syncedNotes = new SyncManager().syncNotes(localNotes, remoteNotes);
+        dataSource.bulkInsertNotes(syncedNotes);*/
+    }
+
+    private void syncNotebooks(String host, String hash)
+    {
+        // TODO sync notebooks
+        String result = fetchTask(host + "/api/v1/notebooks/", hash);
         List<Notebook> remoteNotebooks = parseNotebooks(result);
+        NoteDataSource.getInstance(getContext()).bulkInsertNotebooks(remoteNotebooks);
+    }
 
-        url = host + "/api/v1/tags/";
-        result = fetchTask(url, hash);
+    private void syncTags(String host, String hash)
+    {
+        // TODO sync tags
+        String result = fetchTask(host + "/api/v1/tags/", hash);
         List<Tag> remoteTags = parseTags(result);
+        NoteDataSource.getInstance(getContext()).bulkInsertTags(remoteTags);
+    }
+
+    private Note parseNote(String jsonStr)
+    {
+        Note note = null;
+
+        try
+        {
+            JSONObject jsonNote = new JSONObject(jsonStr);
+            JSONObject version = jsonNote.getJSONObject("version");
+
+            String id = jsonNote.getString("id");
+            String title = version.getString("title");
+            String content = version.getString("content");
+            Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
+            String notebookId = jsonNote.getString("notebook_id");
+
+            note = new NotesAdapter.Note(id);
+            note.setNotebookId(notebookId);
+            note.setTitle(title);
+            note.setContent(content);
+            note.setUpdatedAt(date);
+            note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_SYNCED);
+        }
+        catch (JSONException e)
+        {
+            Log.e(LOG_TAG, "Error parsing JSON " + jsonStr, e);
+        }
+
+        return note;
     }
 
     private List<Note> parseNotes(String jsonStr)
@@ -123,26 +187,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             for (int i = 0; i < jsonNotes.length(); i++)
             {
                 JSONObject jsonNote = jsonNotes.getJSONObject(i);
-                JSONObject version = jsonNote.getJSONObject("version");
-
-                String id = jsonNote.getString("id");
-                String title = version.getString("title");
-                String content = version.getString("content");
-                Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
-                String notebookId = jsonNote.getString("notebook_id");
-
-                Note note = new NotesAdapter.Note(id);
-                note.setNotebookId(notebookId);
-                note.setTitle(title);
-                note.setContent(content);
-                note.setUpdatedAt(date);
+                Note note = parseNote(jsonNote.toString());
 
                 notes.add(note);
             }
         }
         catch (JSONException e)
         {
-            Log.e(LOG_TAG, "Error parsing JSON");
+            Log.d(LOG_TAG, "Error parsing JSON: " + jsonStr, e);
         }
 
         return notes;
@@ -174,7 +226,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         }
         catch (JSONException e)
         {
-            Log.e(LOG_TAG, "Error parsing JSON" + jsonStr, e);
+            Log.d(LOG_TAG, "Error parsing JSON: " + jsonStr, e);
         }
 
         return notebooks;
@@ -199,17 +251,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
                 tag.setTitle(title);
 
                 tags.add(tag);
-                NoteDataSource.getInstance(getContext()).insertTag(tag);
             }
         }
         catch (JSONException e)
         {
-            Log.e(LOG_TAG, "Error parsing Json" + jsonStr);
+            Log.d(LOG_TAG, "Error parsing Json" + jsonStr);
         }
 
         return tags;
     }
-
 
     private String fetchTask(String path, String hash)
     {
@@ -222,8 +272,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             URL url = new URL(path);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty("Authorization", "Basic " + hash);
-            urlConnection.setConnectTimeout(5000);
-            urlConnection.setReadTimeout(10000);
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
@@ -258,6 +306,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             // FIXME workaround because response code is always 200, even if authentication failed
             authenticationFailed();
         }
+        catch (ConnectException e)
+        {
+            Log.d(LOG_TAG, "Connection failed");
+        }
         catch (IOException e)
         {
             Log.e(LOG_TAG, "IO Exception", e);
@@ -282,16 +334,133 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             }
         }
 
-        if (jsonStr.isEmpty())
+        return jsonStr;
+    }
+
+    private Note modifyNote(String path, String hash, Note note, ModifyNote task)
+    {
+        HttpURLConnection urlConnection = null;
+        BufferedReader reader = null;
+        String jsonStr = "";
+
+        try
         {
-            Log.e(LOG_TAG, "Result is empty");
+            URL url = new URL(path);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            urlConnection.setRequestProperty("Accept", "application/json");
+            urlConnection.setRequestProperty("Authorization", "Basic " + hash);
+            urlConnection.setConnectTimeout(5000);
+            urlConnection.setReadTimeout(10000);
+
+            // create json note
+            JSONObject jsonNote = new JSONObject();
+            jsonNote.put("title", note.getTitle());
+            jsonNote.put("content", note.getContent());
+
+            if (task == ModifyNote.create_note)
+            {
+                urlConnection.setRequestMethod("POST");
+                jsonNote.put("content_preview", note.getPreview());
+            }
+            else if (task == ModifyNote.update_note)
+            {
+                urlConnection.setRequestMethod("PUT");
+            }
+            else
+            {
+                Log.e(LOG_TAG, "Task does not exist");
+            }
+
+            urlConnection.connect();
+
+            OutputStream outputStream = urlConnection.getOutputStream();
+            outputStream.write(jsonNote.toString().getBytes());
+            outputStream.flush();
+            outputStream.close();
+
+            // read response
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuilder builder = new StringBuilder();
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                builder.append(line).append("\n");
+            }
+            jsonStr = builder.toString();
+
+
+            int responseCode = urlConnection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED)
+            {
+                authenticationFailed();
+            }
+            else if (responseCode != HttpURLConnection.HTTP_OK)
+            {
+                Log.d(LOG_TAG, "Error while creating note, response code: " + urlConnection.getResponseCode());
+            }
+            else
+            {
+                JSONObject json = new JSONObject(jsonStr);
+                JSONObject jsonResponse = json.getJSONObject("response");
+                Note modifiedNote = parseNote(jsonResponse.toString());
+                return modifiedNote;
+            }
+        }
+        catch (JSONException e)
+        {
+            Log.e(LOG_TAG, "Error creating JSON");
+        }
+        catch (SocketTimeoutException e)
+        {
+            Log.d(LOG_TAG, "Timeout");
+        }
+        catch (FileNotFoundException e)
+        {
+            // FIXME workaround because response code is always 200, even if authentication failed
+            authenticationFailed();
+
+        }
+        catch (IOException e)
+        {
+            Log.e(LOG_TAG, "IOException", e);
+        }
+        finally
+        {
+            if (urlConnection != null)
+            {
+                urlConnection.disconnect();
+            }
+
+            if (reader != null)
+            {
+                try
+                {
+                    reader.close();
+                }
+                catch (final IOException e)
+                {
+                    Log.e(LOG_TAG, "Error closing stream", e);
+                }
+            }
         }
 
-        return jsonStr;
+        Log.d(LOG_TAG, "Failed to modify note");
+        return null;
     }
 
     private void authenticationFailed()
     {
         // TODO handle authentication failure
+    }
+
+    private enum ModifyNote
+    {
+        create_note,
+        update_note,
+        delete_note
     }
 }

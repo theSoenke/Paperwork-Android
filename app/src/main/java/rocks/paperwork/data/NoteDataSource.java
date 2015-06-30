@@ -46,12 +46,12 @@ public class NoteDataSource
 
         try
         {
-            int idColumn = cursor.getColumnIndex(DatabaseContract.NotebookEntry.COLUMN_ID);
+            int uuidColumn = cursor.getColumnIndex(DatabaseContract.NotebookEntry._ID);
             int titleColumn = cursor.getColumnIndex(DatabaseContract.NotebookEntry.COLUMN_TITLE);
 
             while (cursor.moveToNext())
             {
-                Notebook notebook = new Notebook(cursor.getString(idColumn));
+                Notebook notebook = new Notebook(cursor.getString(uuidColumn));
                 notebook.setTitle(cursor.getString(titleColumn));
                 notebooks.add(notebook);
             }
@@ -81,32 +81,41 @@ public class NoteDataSource
         return count;
     }
 
-    public List<Note> getAllNotes()
+    public List<Note> getAllNotes(boolean notSyncedNotes)
     {
         List<Note> notes = new ArrayList<>();
+
+        String selection = null;
+
+        if (notSyncedNotes)
+        {
+            selection = DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS + " = 0";
+        }
 
         Cursor cursor = mContext.getContentResolver().query(
                 DatabaseContract.NoteEntry.CONTENT_URI,
                 null,
-                null,
+                selection,
                 null,
                 DatabaseContract.NoteEntry.COLUMN_UPDATED_AT + " DESC");
 
         try
         {
-            int idColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_ID);
+            int uuidColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry._ID);
             int titleColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_TITLE);
             int contentColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_CONTENT);
             int updatedAtColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT);
+            int syncColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS);
             int notebookColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY);
 
             while (cursor.moveToNext())
             {
-                Note note = new Note(cursor.getString(idColumn));
+                Note note = new Note(cursor.getString(uuidColumn));
                 note.setTitle(cursor.getString(titleColumn));
                 note.setContent(cursor.getString(contentColumn));
                 Date date = DatabaseHelper.getDateTime(cursor.getString(updatedAtColumn));
                 note.setUpdatedAt(date);
+                note.setSyncStatus(cursor.getInt(syncColumn));
                 note.setNotebookId(cursor.getString(notebookColumn));
                 notes.add(note);
             }
@@ -132,19 +141,21 @@ public class NoteDataSource
 
         try
         {
-            int idColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_ID);
+            int uuidColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry._ID);
             int titleColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_TITLE);
             int contentColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_CONTENT);
             int updatedAtColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT);
+            int syncColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS);
             int notebookColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY);
 
             while (cursor.moveToNext())
             {
-                Note note = new Note(cursor.getString(idColumn));
+                Note note = new Note(cursor.getString(uuidColumn));
                 note.setTitle(cursor.getString(titleColumn));
                 note.setContent(cursor.getString(contentColumn));
                 Date date = DatabaseHelper.getDateTime(cursor.getString(updatedAtColumn));
                 note.setUpdatedAt(date);
+                note.setSyncStatus(cursor.getInt(syncColumn));
                 note.setNotebookId(cursor.getString(notebookColumn));
                 notes.add(note);
             }
@@ -169,12 +180,12 @@ public class NoteDataSource
 
         try
         {
-            int idColumn = cursor.getColumnIndex(DatabaseContract.TagEntry.COLUMN_ID);
+            int uuidColumn = cursor.getColumnIndex(DatabaseContract.TagEntry._ID);
             int titleColumn = cursor.getColumnIndex(DatabaseContract.TagEntry.COLUMN_TITLE);
 
             while (cursor.moveToNext())
             {
-                Tag tag = new Tag(cursor.getString(idColumn));
+                Tag tag = new Tag(cursor.getString(uuidColumn));
                 tag.setTitle(cursor.getString(titleColumn));
                 tags.add(tag);
             }
@@ -190,7 +201,7 @@ public class NoteDataSource
     public void insertNotebook(Notebook notebook)
     {
         ContentValues values = new ContentValues();
-        values.put(DatabaseContract.NotebookEntry.COLUMN_ID, notebook.getId());
+        values.put(DatabaseContract.NotebookEntry._ID, notebook.getId());
         values.put(DatabaseContract.NotebookEntry.COLUMN_TITLE, notebook.getTitle());
 
         mContext.getContentResolver().insert(DatabaseContract.NotebookEntry.CONTENT_URI, values);
@@ -203,7 +214,7 @@ public class NoteDataSource
         for (int i = 0; i < notebooks.size(); i++)
         {
             ContentValues values = new ContentValues();
-            values.put(DatabaseContract.NotebookEntry.COLUMN_ID, notebooks.get(i).getId());
+            values.put(DatabaseContract.NotebookEntry._ID, notebooks.get(i).getId());
             values.put(DatabaseContract.NotebookEntry.COLUMN_TITLE, notebooks.get(i).getTitle());
 
             contentValues[i] = values;
@@ -215,10 +226,12 @@ public class NoteDataSource
     public void insertNote(Note note)
     {
         ContentValues values = new ContentValues();
-        values.put(DatabaseContract.NoteEntry.COLUMN_ID, note.getId());
+
+        values.put(DatabaseContract.NoteEntry._ID, note.getId());
         values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, note.getTitle());
         values.put(DatabaseContract.NoteEntry.COLUMN_CONTENT, note.getContent());
         values.put(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT, DatabaseHelper.getDateTime(note.getUpdatedAt()));
+        values.put(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS, note.getSyncStatus());
         values.put(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY, note.getNotebookId());
 
         mContext.getContentResolver().insert(DatabaseContract.NoteEntry.CONTENT_URI, values);
@@ -230,12 +243,15 @@ public class NoteDataSource
 
         for (int i = 0; i < notes.size(); i++)
         {
+            Note note = notes.get(i);
+
             ContentValues values = new ContentValues();
-            values.put(DatabaseContract.NoteEntry.COLUMN_ID, notes.get(i).getId());
-            values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, notes.get(i).getTitle());
-            values.put(DatabaseContract.NoteEntry.COLUMN_CONTENT, notes.get(i).getContent());
-            values.put(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT, DatabaseHelper.getDateTime(notes.get(i).getUpdatedAt()));
-            values.put(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY, notes.get(i).getNotebookId());
+            values.put(DatabaseContract.NoteEntry._ID, note.getId());
+            values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, note.getTitle());
+            values.put(DatabaseContract.NoteEntry.COLUMN_CONTENT, note.getContent());
+            values.put(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT, DatabaseHelper.getDateTime(note.getUpdatedAt()));
+            values.put(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS, note.getSyncStatus());
+            values.put(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY, note.getNotebookId());
 
             contentValues[i] = values;
         }
@@ -246,7 +262,7 @@ public class NoteDataSource
     public void insertTag(Tag tag)
     {
         ContentValues values = new ContentValues();
-        values.put(DatabaseContract.NoteEntry.COLUMN_ID, tag.getId());
+        values.put(DatabaseContract.TagEntry._ID, tag.getId());
         values.put(DatabaseContract.TagEntry.COLUMN_TITLE, tag.getTitle());
 
         mContext.getContentResolver().insert(DatabaseContract.TagEntry.CONTENT_URI, values);
@@ -259,7 +275,7 @@ public class NoteDataSource
         for (int i = 0; i < tags.size(); i++)
         {
             ContentValues values = new ContentValues();
-            values.put(DatabaseContract.NotebookEntry.COLUMN_ID, tags.get(i).getId());
+            values.put(DatabaseContract.NotebookEntry._ID, tags.get(i).getId());
             values.put(DatabaseContract.NotebookEntry.COLUMN_TITLE, tags.get(i).getTitle());
 
             contentValues[i] = values;
@@ -270,7 +286,7 @@ public class NoteDataSource
 
     public void deleteNote(Note note)
     {
-        String whereClause = DatabaseContract.NoteEntry.COLUMN_ID + " = '" + note.getId() + "'";
+        String whereClause = DatabaseContract.NoteEntry._ID + " = '" + note.getId() + "'";
         mContext.getContentResolver().delete(
                 DatabaseContract.NoteEntry.CONTENT_URI,
                 whereClause,
