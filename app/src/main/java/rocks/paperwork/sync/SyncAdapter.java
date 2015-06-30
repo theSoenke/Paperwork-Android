@@ -7,6 +7,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -91,17 +92,51 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         String host = HostPreferences.readSharedSetting(getContext(), HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(getContext(), HostPreferences.HASH, "");
 
-        // TODO synchronize local and remote data
-        syncNotes(host, hash);
-        syncNotebooks(host, hash);
-        syncTags(host, hash);
+        uploadLocalNotes(host, hash);
+        fetch(host, hash, NoteData.notebooks);
+        fetch(host, hash, NoteData.notes);
+        fetch(host, hash, NoteData.tags);
     }
 
-    private void syncNotes(String host, String hash)
+    private void syncNotes()
     {
-        NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
+        // TODO synchronize local and remote notes
+        /*List<Note> remoteNotes = parseNotes(result);
+        List<Note> localNotes = dataSource.getAllNotes(false);
 
+        List<Note> syncedNotes = new SyncManager().syncNotes(localNotes, remoteNotes);
+        dataSource.bulkInsertNotes(syncedNotes);*/
+    }
+
+    private void fetch(String host, String hash, NoteData data)
+    {
+        if (data == NoteData.notes)
+        {
+            // TODO sync local and remote notes
+            String result = fetchTask(host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes", hash);
+            List<Note> allNotes = parseNotes(result);
+            NoteDataSource.getInstance(getContext()).bulkInsertNotes(allNotes);
+        }
+        else if (data == NoteData.notebooks)
+        {
+            // TODO sync local and remote notebooks
+            String result = fetchTask(host + "/api/v1/notebooks/", hash);
+            List<Notebook> remoteNotebooks = parseNotebooks(result);
+            NoteDataSource.getInstance(getContext()).bulkInsertNotebooks(remoteNotebooks);
+        }
+        else if (data == NoteData.tags)
+        {
+            // TODO sync tags
+            String result = fetchTask(host + "/api/v1/tags/", hash);
+            List<Tag> remoteTags = parseTags(result);
+            NoteDataSource.getInstance(getContext()).bulkInsertTags(remoteTags);
+        }
+    }
+
+    private void uploadLocalNotes(String host, String hash)
+    {
         // uploads not yet synced notes
+        NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
         List<Note> notSyncedNotes = dataSource.getAllNotes(true);
 
         for (Note note : notSyncedNotes)
@@ -113,34 +148,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
                 dataSource.insertNote(newNote);
             }
         }
-
-        String result = fetchTask(host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes", hash);
-        List<Note> allNotes = parseNotes(result);
-
-        dataSource.bulkInsertNotes(allNotes);
-
-        // TODO synchronize local and remote notes
-        /*List<Note> remoteNotes = parseNotes(result);
-        List<Note> localNotes = dataSource.getAllNotes(false);
-
-        List<Note> syncedNotes = new SyncManager().syncNotes(localNotes, remoteNotes);
-        dataSource.bulkInsertNotes(syncedNotes);*/
-    }
-
-    private void syncNotebooks(String host, String hash)
-    {
-        // TODO sync notebooks
-        String result = fetchTask(host + "/api/v1/notebooks/", hash);
-        List<Notebook> remoteNotebooks = parseNotebooks(result);
-        NoteDataSource.getInstance(getContext()).bulkInsertNotebooks(remoteNotebooks);
-    }
-
-    private void syncTags(String host, String hash)
-    {
-        // TODO sync tags
-        String result = fetchTask(host + "/api/v1/tags/", hash);
-        List<Tag> remoteTags = parseTags(result);
-        NoteDataSource.getInstance(getContext()).bulkInsertTags(remoteTags);
     }
 
     private Note parseNote(String jsonStr)
@@ -462,5 +469,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         create_note,
         update_note,
         delete_note
+    }
+
+    private enum NoteData
+    {
+        notes,
+        notebooks,
+        tags
     }
 }
