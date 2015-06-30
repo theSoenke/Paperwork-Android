@@ -259,13 +259,13 @@ public class NoteActivity extends AppCompatActivity
             if (mNewNote)
             {
                 mNote = new Note(UUID.randomUUID().toString());
-                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_NOT_SYNCED);
+                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
                 String notebookId = (String) getIntent().getExtras().getSerializable("NotebookId");
                 mNote.setNotebookId(notebookId);
             }
             else
             {
-                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_EDITED);
+                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
             }
 
             mNote.setTitle(mTextTitle.getText().toString());

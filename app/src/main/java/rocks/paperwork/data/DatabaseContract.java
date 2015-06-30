@@ -21,11 +21,6 @@ public class DatabaseContract
     {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_NOTES).build();
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_NOTES;
-
-        public static final int NOTE_NOT_SYNCED = 0;
-        public static final int NOTE_EDITED = 1;
-        public static final int NOTE_SYNCED = 2;
-
         public static final String TABLE_NAME = "note";
         public static final String COLUMN_TITLE = "title";
         public static final String COLUMN_CONTENT = "content";
@@ -36,6 +31,14 @@ public class DatabaseContract
         public static Uri buildNoteUri(long id)
         {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static enum NOTE_STATUS
+        {
+            not_synced,
+            edited,
+            synced,
+            all
         }
     }
 
