@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         sInstance = this;
 
         if (!HostPreferences.preferencesExist(this))
@@ -110,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onChange(boolean selfChange)
                     {
+                        SyncAdapter.syncImmediately(MainActivity.this);
                         updateView();
                     }
                 });
