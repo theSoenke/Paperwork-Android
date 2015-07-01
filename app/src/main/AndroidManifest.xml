@@ -32,7 +32,8 @@
             android:windowSoftInputMode="adjustResize|stateVisible">
         </activity>
         <service
-            android:name=".sync.AuthenticatorService">
+            android:name=".sync.AuthenticatorService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>

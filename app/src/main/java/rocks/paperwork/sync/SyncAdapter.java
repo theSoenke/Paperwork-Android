@@ -97,35 +97,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         fetch(host, hash, NoteData.tags);
     }
 
-    private void syncNotes()
-    {
-        // TODO synchronize local and remote notes
-        /*List<Note> remoteNotes = parseNotes(result);
-        List<Note> localNotes = dataSource.getAllNotes(false);
-
-        List<Note> syncedNotes = new SyncManager().syncNotes(localNotes, remoteNotes);
-        dataSource.bulkInsertNotes(syncedNotes);*/
-    }
-
     private void fetch(String host, String hash, NoteData data)
     {
+        // TODO sync local and remote versions if needed
         if (data == NoteData.notes)
         {
-            // TODO sync local and remote notes
             String result = fetchTask(host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes", hash);
             List<Note> allNotes = parseNotes(result);
             NoteDataSource.getInstance(getContext()).bulkInsertNotes(allNotes);
         }
         else if (data == NoteData.notebooks)
         {
-            // TODO sync local and remote notebooks
             String result = fetchTask(host + "/api/v1/notebooks/", hash);
             List<Notebook> remoteNotebooks = parseNotebooks(result);
             NoteDataSource.getInstance(getContext()).bulkInsertNotebooks(remoteNotebooks);
         }
         else if (data == NoteData.tags)
         {
-            // TODO sync tags
             String result = fetchTask(host + "/api/v1/tags/", hash);
             List<Tag> remoteTags = parseTags(result);
             NoteDataSource.getInstance(getContext()).bulkInsertTags(remoteTags);
@@ -136,7 +124,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
     {
         // uploads not yet synced notes
         NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
-        List<Note> notSyncedNotes = dataSource.getAllNotes(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
+        List<Note> notSyncedNotes = dataSource.getAllNotes(DatabaseContract.NoteEntry.SYNC_STATUS.not_synced);
 
         for (Note note : notSyncedNotes)
         {
@@ -148,11 +136,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             }
         }
 
-        List<Note> editedNotes = dataSource.getAllNotes(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
+        List<Note> editedNotes = dataSource.getAllNotes(DatabaseContract.NoteEntry.SYNC_STATUS.edited);
 
         for (Note note : editedNotes)
         {
-            Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes", hash, note, ModifyNote.create_note);
+            Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes", hash, note, ModifyNote.update_note);
             if (newNote != null)
             {
                 dataSource.deleteNote(note);
@@ -181,7 +169,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             note.setTitle(title);
             note.setContent(content);
             note.setUpdatedAt(date);
-            note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
+            note.setSyncStatus(DatabaseContract.NoteEntry.SYNC_STATUS.synced);
         }
         catch (JSONException e)
         {
@@ -359,7 +347,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
-        String jsonStr = "";
+        String jsonStr;
 
         try
         {
@@ -424,8 +412,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             {
                 JSONObject json = new JSONObject(jsonStr);
                 JSONObject jsonResponse = json.getJSONObject("response");
-                Note modifiedNote = parseNote(jsonResponse.toString());
-                return modifiedNote;
+                return parseNote(jsonResponse.toString());
             }
         }
         catch (JSONException e)

@@ -253,8 +253,8 @@ public class LoginActivity extends Activity
         protected Integer doInBackground(String... params)
         {
             HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String jsonStr = "";
+            BufferedReader reader;
+            String jsonStr;
 
             try
             {
