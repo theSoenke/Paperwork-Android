@@ -22,11 +22,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
@@ -91,7 +94,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         String host = HostPreferences.readSharedSetting(getContext(), HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(getContext(), HostPreferences.HASH, "");
 
+        if (host.isEmpty())
+        {
+            Log.d(LOG_TAG, "No user is logged in");
+            return;
+        }
+
         uploadNotes(host, hash);
+        deleteNotes(host, hash);
         fetch(host, hash, NoteData.notebooks);
         fetch(host, hash, NoteData.notes);
         fetch(host, hash, NoteData.tags);
@@ -99,12 +109,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 
     private void fetch(String host, String hash, NoteData data)
     {
-        // TODO sync local and remote versions if needed
+        NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
+        SyncManager syncManager = new SyncManager(host, hash);
+
         if (data == NoteData.notes)
         {
             String result = fetchTask(host + "/api/v1/notebooks/" + Notebook.DEFAULT_ID + "/notes", hash);
-            List<Note> allNotes = parseNotes(result);
-            NoteDataSource.getInstance(getContext()).bulkInsertNotes(allNotes);
+            List<Note> remoteNotes = parseNotes(result);
+            List<Note> localNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.all);
+
+            syncManager.syncNotes(localNotes, remoteNotes);
         }
         else if (data == NoteData.notebooks)
         {
@@ -120,47 +134,50 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         }
     }
 
+    /**
+     * Uploads new notes
+     *
+     * @param host
+     * @param hash
+     */
     private void uploadNotes(String host, String hash)
     {
-        // uploads not yet synced notes
         NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
         List<Note> notSyncedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
 
         for (Note note : notSyncedNotes)
         {
-            Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes", hash, note, ModifyNote.create_note);
+            Note newNote = modifyNote(host, hash, note, ModifyNote.create_note);
             if (newNote != null)
             {
                 dataSource.deleteNote(note);
                 dataSource.insertNote(newNote);
             }
-        }
-
-        // upload edited notes
-        List<Note> editedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
-
-        for (Note note : editedNotes)
-        {
-            Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId(), hash, note, ModifyNote.update_note);
-            if (newNote != null)
+            else
             {
-                dataSource.deleteNote(note);
-                dataSource.insertNote(newNote);
+                Log.d(LOG_TAG, "Creating note failed");
             }
         }
+    }
 
-        // delete notes
+    /**
+     * Delete notes on the server
+     *
+     * @param host
+     * @param hash
+     */
+    private void deleteNotes(String host, String hash)
+    {
+        NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
         List<Note> deletedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
 
         for (Note note : deletedNotes)
         {
-            Note deletedNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId(), hash, note, ModifyNote.update_note);
-            if (deletedNote != null)
-            {
-                dataSource.deleteNote(note);
-            }
+            modifyNote(host, hash, note, ModifyNote.delete_note);
+            dataSource.deleteNote(note);
         }
     }
+
 
     private Note parseNote(String jsonStr)
     {
@@ -356,11 +373,25 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         return jsonStr;
     }
 
-    private Note modifyNote(String path, String hash, Note note, ModifyNote task)
+    private Note modifyNote(String host, String hash, Note note, ModifyNote task)
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String jsonStr;
+        String path = "";
+
+        if (task == ModifyNote.create_note)
+        {
+            path = host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes";
+        }
+        else if (task == ModifyNote.update_note)
+        {
+            path = host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId();
+        }
+        else if (task == ModifyNote.delete_note)
+        {
+            path = host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId();
+        }
 
         try
         {
@@ -430,19 +461,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             }
             else
             {
-                JSONObject json = new JSONObject(jsonStr);
-                JSONObject jsonResponse = json.getJSONObject("response");
-
                 if (task == ModifyNote.delete_note)
                 {
                     return new Note("");
                 }
+
+                JSONObject json = new JSONObject(jsonStr);
+                JSONObject jsonResponse = json.getJSONObject("response");
+
                 return parseNote(jsonResponse.toString());
             }
         }
         catch (JSONException e)
         {
-            Log.e(LOG_TAG, "Error creating JSON");
+            Log.e(LOG_TAG, "Error parsing JSON", e);
+        }
+        catch (MalformedURLException e)
+        {
+            Log.e(LOG_TAG, "Malformed URL: " + path);
         }
         catch (SocketTimeoutException e)
         {
@@ -451,8 +487,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         catch (FileNotFoundException e)
         {
             // FIXME workaround because response code is always 200, even if authentication failed
+            Log.d(LOG_TAG, "FileNotFound: " + path + task);
             authenticationFailed();
-
         }
         catch (IOException e)
         {
@@ -485,6 +521,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
     private void authenticationFailed()
     {
         // TODO handle authentication failure
+        Log.e(LOG_TAG, "Authentication failed");
     }
 
     private enum ModifyNote
@@ -499,5 +536,73 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         notes,
         notebooks,
         tags
+    }
+
+    public class SyncManager
+    {
+        private final String mHost;
+        private final String mHash;
+
+        public SyncManager(String host, String hash)
+        {
+            mHost = host;
+            mHash = hash;
+        }
+
+        public void syncNotes(List<Note> localEditedNotes, List<Note> remoteNotes)
+        {
+            Map<String, Note> noteIds = new HashMap<>();
+            List<Note> updatedNotes = new ArrayList<>();
+
+            NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
+
+            for (Note localNote : localEditedNotes)
+            {
+                noteIds.put(localNote.getId(), localNote);
+            }
+
+            for (Note remoteNote : remoteNotes)
+            {
+                if (!noteIds.containsKey(remoteNote.getId()))
+                {
+                    updatedNotes.add(remoteNote);
+                    continue;
+                }
+
+                Note localNote = noteIds.get(remoteNote.getId());
+
+                if (localNote == null)
+                {
+                    Log.e(LOG_TAG, "Error accessing note");
+                    continue;
+                }
+
+                if (localNote.getUpdatedAt().after(remoteNote.getUpdatedAt()))
+                {
+                    // local note is newer
+                    Note result = modifyNote(mHost, mHash, localNote, ModifyNote.update_note);
+                    if (result != null)
+                    {
+                        result.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
+                        dataSource.insertNote(result);
+                    }
+                }
+                else if (localNote.getUpdatedAt().before(remoteNote.getUpdatedAt()))
+                {
+                    // remote note is newer
+                    if (remoteNote.getSyncStatus() == DatabaseContract.NoteEntry.NOTE_STATUS.synced)
+                    {
+                        updatedNotes.add(localNote);
+                    }
+                    else if (remoteNote.getSyncStatus() == DatabaseContract.NoteEntry.NOTE_STATUS.edited)
+                    {
+                        // FIXME note was edited locally and on the server -> conflict
+                        Log.d(LOG_TAG, "Sync conflict");
+                    }
+                }
+            }
+
+            dataSource.bulkInsertNotes(updatedNotes);
+        }
     }
 }

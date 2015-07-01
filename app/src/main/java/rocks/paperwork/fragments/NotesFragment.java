@@ -90,6 +90,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
 
         mSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
 
+        // TODO stop SwipeRefreshLayout when there a no changes
         // Setup refresh listener which triggers new data loading
         mSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
         {

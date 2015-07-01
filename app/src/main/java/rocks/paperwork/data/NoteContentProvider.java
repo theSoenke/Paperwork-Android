@@ -315,7 +315,7 @@ public class NoteContentProvider extends ContentProvider
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        if (rowsDeleted != 0)
+        if (rowsDeleted > 0)
         {
             getContext().getContentResolver().notifyChange(uri, null);
         }
