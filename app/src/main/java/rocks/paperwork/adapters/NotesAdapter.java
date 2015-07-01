@@ -68,7 +68,7 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         private String mContent;
         private String mNotebookId;
         private Date mUpdatedAt;
-        private DatabaseContract.NoteEntry.SYNC_STATUS mSyncStatus;
+        private DatabaseContract.NoteEntry.NOTE_STATUS mSyncStatus;
 
         public Note(String uuid)
         {
@@ -126,12 +126,12 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
             mUpdatedAt = date;
         }
 
-        public DatabaseContract.NoteEntry.SYNC_STATUS getSyncStatus()
+        public DatabaseContract.NoteEntry.NOTE_STATUS getSyncStatus()
         {
             return mSyncStatus;
         }
 
-        public void setSyncStatus(DatabaseContract.NoteEntry.SYNC_STATUS status)
+        public void setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS status)
         {
             mSyncStatus = status;
         }

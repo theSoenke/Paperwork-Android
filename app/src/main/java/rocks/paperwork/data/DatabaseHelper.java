@@ -17,7 +17,7 @@ import rocks.paperwork.data.DatabaseContract.TagEntry;
 public class DatabaseHelper extends SQLiteOpenHelper
 {
     private static final String DATABASE_NAME = "notes.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String LOG_TAG = DatabaseHelper.class.getName();
 
     public DatabaseHelper(Context context)
@@ -82,7 +82,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1)
     {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS" + NoteEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + NoteEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + NotebookEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TagEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);

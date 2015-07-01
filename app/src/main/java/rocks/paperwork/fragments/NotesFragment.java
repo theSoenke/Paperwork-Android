@@ -29,27 +29,19 @@ import rocks.paperwork.data.DatabaseContract;
 import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.interfaces.AsyncCallback;
 import rocks.paperwork.sync.SyncAdapter;
-import rocks.paperwork.sync.SyncNotesTask;
 
 
 public class NotesFragment extends Fragment implements AsyncCallback
 {
-    private static NotesFragment sInstance;
     private NotesAdapter mNotesAdapter;
     private TextView emptyText;
     private SwipeRefreshLayout mSwipeContainer;
     private Notebook mNotebook;
 
-    public static NotesFragment getInstance()
-    {
-        return sInstance;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
             savedInstanceState)
     {
-        sInstance = this;
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
 
         mNotesAdapter = new NotesAdapter(getActivity(), R.id.list_notebooks, new ArrayList<Note>());
@@ -147,7 +139,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
         }
         else
         {
-            notes = noteDataSource.getAllNotes(DatabaseContract.NoteEntry.SYNC_STATUS.all);
+            notes = noteDataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.all);
         }
 
         mNotesAdapter.addAll(notes);
@@ -247,7 +239,8 @@ public class NotesFragment extends Fragment implements AsyncCallback
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        new SyncNotesTask(getActivity()).deleteNote(note);
+                        note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
+                        NoteDataSource.getInstance(getActivity()).insertNote(note);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()

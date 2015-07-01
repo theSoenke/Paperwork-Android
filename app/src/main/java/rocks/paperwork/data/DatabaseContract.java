@@ -33,11 +33,12 @@ public class DatabaseContract
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public enum SYNC_STATUS
+        public enum NOTE_STATUS
         {
             not_synced,
             edited,
             synced,
+            deleted,
             all
         }
     }
