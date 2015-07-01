@@ -33,7 +33,7 @@ public class DatabaseContract
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public static enum NOTE_STATUS
+        public enum SYNC_STATUS
         {
             not_synced,
             edited,
@@ -60,7 +60,6 @@ public class DatabaseContract
     {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_TAGS).build();
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TAGS;
-        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TAGS;
 
         public static final String TABLE_NAME = "tag";
         public static final String COLUMN_TITLE = "title";

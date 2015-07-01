@@ -12,12 +12,9 @@ import android.os.Bundle;
  */
 public class Authenticator extends AbstractAccountAuthenticator
 {
-    private final Context mContext;
-
     public Authenticator(Context context)
     {
         super(context);
-        mContext = context;
     }
 
     @Override

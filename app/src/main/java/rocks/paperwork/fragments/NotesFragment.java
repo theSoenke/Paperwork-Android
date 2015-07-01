@@ -147,7 +147,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
         }
         else
         {
-            notes = noteDataSource.getAllNotes(DatabaseContract.NoteEntry.NOTE_STATUS.all);
+            notes = noteDataSource.getAllNotes(DatabaseContract.NoteEntry.SYNC_STATUS.all);
         }
 
         mNotesAdapter.addAll(notes);

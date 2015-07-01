@@ -3,7 +3,9 @@ package rocks.paperwork.activities;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import rocks.paperwork.R;
+import rocks.paperwork.data.DatabaseContract;
 import rocks.paperwork.data.HostPreferences;
 import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.fragments.NotebooksFragment;
@@ -100,6 +103,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         );
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
+
+        getContentResolver().registerContentObserver(
+                DatabaseContract.NoteEntry.CONTENT_URI, true, new ContentObserver(new Handler(getMainLooper()))
+                {
+                    @Override
+                    public void onChange(boolean selfChange)
+                    {
+                        updateView();
+                    }
+                });
+
 
         SyncAdapter.syncImmediately(this);
     }
