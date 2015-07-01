@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -40,6 +41,7 @@ import rocks.paperwork.data.DatabaseContract;
 import rocks.paperwork.data.DatabaseHelper;
 import rocks.paperwork.data.HostPreferences;
 import rocks.paperwork.data.NoteDataSource;
+import rocks.paperwork.fragments.NotesFragment;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter
 {
@@ -603,6 +605,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             }
 
             dataSource.bulkInsertNotes(updatedNotes);
+
+            // stop swipe refresh
+            if (updatedNotes.size() == 0)
+            {
+                Handler mainHandler = new Handler(getContext().getMainLooper());
+                Runnable myRunnable = new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        NotesFragment.stopRefresh();
+                    }
+                };
+                mainHandler.post(myRunnable);
+            }
         }
     }
 }
