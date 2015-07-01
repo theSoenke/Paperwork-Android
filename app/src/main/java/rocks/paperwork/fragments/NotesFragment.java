@@ -35,8 +35,9 @@ public class NotesFragment extends Fragment implements AsyncCallback
 {
     private NotesAdapter mNotesAdapter;
     private TextView emptyText;
-    private SwipeRefreshLayout mSwipeContainer;
+    private static SwipeRefreshLayout sSwipeContainer;
     private Notebook mNotebook;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
@@ -88,11 +89,11 @@ public class NotesFragment extends Fragment implements AsyncCallback
             }
         });
 
-        mSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
+        sSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
 
         // TODO stop SwipeRefreshLayout when there a no changes
         // Setup refresh listener which triggers new data loading
-        mSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        sSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
         {
             @Override
             public void onRefresh()
@@ -125,10 +126,15 @@ public class NotesFragment extends Fragment implements AsyncCallback
         return view;
     }
 
+    public static void stopRefresh()
+    {
+        sSwipeContainer.setRefreshing(false);
+    }
+
     @Override
     public void updateView()
     {
-        mSwipeContainer.setRefreshing(false);
+        sSwipeContainer.setRefreshing(false);
         mNotesAdapter.clear();
 
         NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
