@@ -25,7 +25,6 @@ import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
 import rocks.paperwork.data.DatabaseContract;
 import rocks.paperwork.data.NoteDataSource;
-import rocks.paperwork.sync.SyncNotesTask;
 
 public class NoteActivity extends AppCompatActivity
 {
@@ -259,13 +258,13 @@ public class NoteActivity extends AppCompatActivity
             if (mNewNote)
             {
                 mNote = new Note(UUID.randomUUID().toString());
-                mNote.setSyncStatus(DatabaseContract.NoteEntry.SYNC_STATUS.not_synced);
+                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
                 String notebookId = (String) getIntent().getExtras().getSerializable("NotebookId");
                 mNote.setNotebookId(notebookId);
             }
             else
             {
-                mNote.setSyncStatus(DatabaseContract.NoteEntry.SYNC_STATUS.edited);
+                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
             }
 
             mNote.setTitle(mTextTitle.getText().toString());
@@ -331,7 +330,8 @@ public class NoteActivity extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        new SyncNotesTask(NoteActivity.this).deleteNote(mNote);
+                        mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
+                        NoteDataSource.getInstance(NoteActivity.this).insertNote(mNote);
                         onBackPressed();
                         finish();
                     }

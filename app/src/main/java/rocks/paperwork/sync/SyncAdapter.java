@@ -124,7 +124,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
     {
         // uploads not yet synced notes
         NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
-        List<Note> notSyncedNotes = dataSource.getAllNotes(DatabaseContract.NoteEntry.SYNC_STATUS.not_synced);
+        List<Note> notSyncedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
 
         for (Note note : notSyncedNotes)
         {
@@ -136,15 +136,28 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             }
         }
 
-        List<Note> editedNotes = dataSource.getAllNotes(DatabaseContract.NoteEntry.SYNC_STATUS.edited);
+        // upload edited notes
+        List<Note> editedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
 
         for (Note note : editedNotes)
         {
-            Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes", hash, note, ModifyNote.update_note);
+            Note newNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId(), hash, note, ModifyNote.update_note);
             if (newNote != null)
             {
                 dataSource.deleteNote(note);
                 dataSource.insertNote(newNote);
+            }
+        }
+
+        // delete notes
+        List<Note> deletedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
+
+        for (Note note : deletedNotes)
+        {
+            Note deletedNote = modifyNote(host + "/api/v1/notebooks/" + note.getNotebookId() + "/notes/" + note.getId(), hash, note, ModifyNote.update_note);
+            if (deletedNote != null)
+            {
+                dataSource.deleteNote(note);
             }
         }
     }
@@ -169,7 +182,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             note.setTitle(title);
             note.setContent(content);
             note.setUpdatedAt(date);
-            note.setSyncStatus(DatabaseContract.NoteEntry.SYNC_STATUS.synced);
+            note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
         }
         catch (JSONException e)
         {
@@ -373,6 +386,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             {
                 urlConnection.setRequestMethod("PUT");
             }
+            else if (task == ModifyNote.delete_note)
+            {
+                urlConnection.setRequestMethod("DELETE");
+            }
             else
             {
                 Log.e(LOG_TAG, "Task does not exist");
@@ -380,10 +397,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 
             urlConnection.connect();
 
-            OutputStream outputStream = urlConnection.getOutputStream();
-            outputStream.write(jsonNote.toString().getBytes());
-            outputStream.flush();
-            outputStream.close();
+            if (task != ModifyNote.delete_note)
+            {
+                OutputStream outputStream = urlConnection.getOutputStream();
+                outputStream.write(jsonNote.toString().getBytes());
+                outputStream.flush();
+                outputStream.close();
+            }
 
             // read response
             InputStream inputStream = urlConnection.getInputStream();
@@ -412,6 +432,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             {
                 JSONObject json = new JSONObject(jsonStr);
                 JSONObject jsonResponse = json.getJSONObject("response");
+
+                if (task == ModifyNote.delete_note)
+                {
+                    return new Note("");
+                }
                 return parseNote(jsonResponse.toString());
             }
         }
