@@ -16,4 +16,5 @@
     <color name="clouds">#ecf0f1</color>
     <color name="note_toolbar">#F5F5F5</color>
     <color name="toolbar_text">#BDBDBD</color>
+    <color name="gray">#E5E5E5</color>
 </resources>
