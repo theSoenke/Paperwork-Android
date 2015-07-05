@@ -38,8 +38,7 @@ public class DatabaseContract
             not_synced,
             edited,
             synced,
-            deleted,
-            all
+            deleted
         }
     }
 

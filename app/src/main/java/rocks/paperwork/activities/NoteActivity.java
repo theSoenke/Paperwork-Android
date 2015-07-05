@@ -25,6 +25,7 @@ import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
 import rocks.paperwork.data.DatabaseContract;
 import rocks.paperwork.data.NoteDataSource;
+import rocks.paperwork.sync.SyncAdapter;
 
 public class NoteActivity extends AppCompatActivity
 {
@@ -42,7 +43,6 @@ public class NoteActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
-
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(mToolbar);
@@ -264,14 +264,18 @@ public class NoteActivity extends AppCompatActivity
             }
             else
             {
-                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
+                if(mNote.getSyncStatus() != DatabaseContract.NoteEntry.NOTE_STATUS.not_synced)
+                {
+                    mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
+                }
             }
-
             mNote.setTitle(mTextTitle.getText().toString());
-            mNote.setContent(mEditContent.getText().toString());
+            mNote.setContent(Html.toHtml(mEditContent.getText()));
             mNote.setUpdatedAt(Calendar.getInstance().getTime());
 
             NoteDataSource.getInstance(this).insertNote(mNote);
+
+            SyncAdapter.syncImmediately(NoteActivity.this);
         }
     }
 
@@ -332,6 +336,7 @@ public class NoteActivity extends AppCompatActivity
                     {
                         mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
                         NoteDataSource.getInstance(NoteActivity.this).insertNote(mNote);
+                        SyncAdapter.syncImmediately(NoteActivity.this);
                         onBackPressed();
                         finish();
                     }

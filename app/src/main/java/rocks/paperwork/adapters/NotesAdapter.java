@@ -106,6 +106,18 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
             return mContent.substring(0, mContent.length() >= 255 ? 255 : mContent.length());
         }
 
+        @Override
+        public int hashCode()
+        {
+            return getId().hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            return getId().equals(((Note) o).getId());
+        }
+
         public String getNotebookId()
         {
             return mNotebookId;
