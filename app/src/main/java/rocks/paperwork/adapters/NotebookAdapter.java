@@ -9,11 +9,12 @@ import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
-import rocks.paperwork.data.NotesDataSource;
+import rocks.paperwork.data.NoteDataSource;
 
 public class NotebookAdapter extends ArrayAdapter<Notebook>
 {
@@ -35,14 +36,14 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
 
         Notebook notebook = mNotebooks.get(position);
 
-        int notebookCount = NotesDataSource.getInstance(mContext).getNumberOfNotesInNotebook(notebook);
+        int notebookCount = NoteDataSource.getInstance(mContext).getNumberOfNotesInNotebook(notebook);
         TextView notebookTitle = (TextView) rowView.findViewById(R.id.notebook_title);
         TextView notebookCountText = (TextView) rowView.findViewById(R.id.notebook_count);
 
         notebookTitle.setText(notebook.getTitle());
 
         String noteText;
-        if(notebookCount == 0 || notebookCount > 1)
+        if (notebookCount == 0 || notebookCount > 1)
         {
             noteText = mContext.getString(R.string.notes);
         }
@@ -50,7 +51,7 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         {
             noteText = mContext.getString(R.string.note);
         }
-        notebookCountText.setText(Integer.toString(notebookCount) + " " +  noteText);
+        notebookCountText.setText(Integer.toString(notebookCount) + " " + noteText);
 
         return rowView;
     }
@@ -60,6 +61,7 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         public static final String DEFAULT_ID = "00000000-0000-0000-0000-000000000000";
         private final String mId;
         private String mTitle;
+        private Date mUpdatedAt;
 
         public Notebook(String id)
         {
@@ -80,5 +82,16 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         {
             return mId;
         }
+
+        public Date getUpdatedAt()
+        {
+            return mUpdatedAt;
+        }
+
+        public void setUpdatedAt(Date date)
+        {
+            mUpdatedAt = date;
+        }
+
     }
 }

@@ -10,8 +10,7 @@
         android:layout_gravity="center"
         android:text="@string/no_notes"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:visibility="gone"/>
+        android:textStyle="bold"/>
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/main_content"

@@ -17,10 +17,15 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import java.util.Calendar;
+import java.util.UUID;
+
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
-import rocks.paperwork.network.SyncNotesTask;
+import rocks.paperwork.data.DatabaseContract;
+import rocks.paperwork.data.NoteDataSource;
+import rocks.paperwork.sync.SyncAdapter;
 
 public class NoteActivity extends AppCompatActivity
 {
@@ -38,7 +43,6 @@ public class NoteActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
-
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(mToolbar);
@@ -61,9 +65,9 @@ public class NoteActivity extends AppCompatActivity
             }
         });
 
-        if (getIntent().hasExtra("NOTE"))
+        if (getIntent().hasExtra("NOTES"))
         {
-            mNote = (NotesAdapter.Note) getIntent().getExtras().getSerializable("NOTE");
+            mNote = (NotesAdapter.Note) getIntent().getExtras().getSerializable("NOTES");
             mTextTitle.setText(mNote.getTitle());
 
             String content = mNote.getContent();
@@ -251,25 +255,27 @@ public class NoteActivity extends AppCompatActivity
     {
         if (changesToSave())
         {
-            SyncNotesTask syncNotes = new SyncNotesTask(this);
-
             if (mNewNote)
             {
-                mNote = new Note("");
-                mNote.setTitle(mTextTitle.getText().toString());
-                mNote.setContent(mEditContent.getText().toString());
-
+                mNote = new Note(UUID.randomUUID().toString());
+                mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
                 String notebookId = (String) getIntent().getExtras().getSerializable("NotebookId");
                 mNote.setNotebookId(notebookId);
-                syncNotes.createNote(mNote);
             }
             else
             {
-                mNote.setTitle(mTextTitle.getText().toString());
-                mNote.setContent(mEditContent.getText().toString());
-
-                syncNotes.updateNote(mNote);
+                if(mNote.getSyncStatus() != DatabaseContract.NoteEntry.NOTE_STATUS.not_synced)
+                {
+                    mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
+                }
             }
+            mNote.setTitle(mTextTitle.getText().toString());
+            mNote.setContent(Html.toHtml(mEditContent.getText()));
+            mNote.setUpdatedAt(Calendar.getInstance().getTime());
+
+            NoteDataSource.getInstance(this).insertNote(mNote);
+
+            SyncAdapter.syncImmediately(NoteActivity.this);
         }
     }
 
@@ -328,7 +334,9 @@ public class NoteActivity extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        new SyncNotesTask(NoteActivity.this).deleteNote(mNote);
+                        mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
+                        NoteDataSource.getInstance(NoteActivity.this).insertNote(mNote);
+                        SyncAdapter.syncImmediately(NoteActivity.this);
                         onBackPressed();
                         finish();
                     }

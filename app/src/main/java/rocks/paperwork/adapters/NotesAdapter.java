@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import rocks.paperwork.R;
+import rocks.paperwork.data.DatabaseContract;
 
 public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
 {
@@ -62,16 +63,16 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
 
     public static class Note implements Serializable
     {
-        private final String mId;
+        private String mId;
         private String mTitle;
         private String mContent;
         private String mNotebookId;
         private Date mUpdatedAt;
+        private DatabaseContract.NoteEntry.NOTE_STATUS mSyncStatus;
 
-
-        public Note(String id)
+        public Note(String uuid)
         {
-            mId = id;
+            mId = uuid;
         }
 
         public String getId()
@@ -105,6 +106,18 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
             return mContent.substring(0, mContent.length() >= 255 ? 255 : mContent.length());
         }
 
+        @Override
+        public int hashCode()
+        {
+            return getId().hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            return getId().equals(((Note) o).getId());
+        }
+
         public String getNotebookId()
         {
             return mNotebookId;
@@ -123,6 +136,16 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         public void setUpdatedAt(Date date)
         {
             mUpdatedAt = date;
+        }
+
+        public DatabaseContract.NoteEntry.NOTE_STATUS getSyncStatus()
+        {
+            return mSyncStatus;
+        }
+
+        public void setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS status)
+        {
+            mSyncStatus = status;
         }
     }
 }
