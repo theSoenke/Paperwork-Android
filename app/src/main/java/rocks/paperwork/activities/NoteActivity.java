@@ -17,13 +17,13 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import java.util.Calendar;
 import java.util.UUID;
 
 import rocks.paperwork.R;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
 import rocks.paperwork.data.DatabaseContract;
+import rocks.paperwork.data.DatabaseHelper;
 import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.sync.SyncAdapter;
 
@@ -264,14 +264,14 @@ public class NoteActivity extends AppCompatActivity
             }
             else
             {
-                if(mNote.getSyncStatus() != DatabaseContract.NoteEntry.NOTE_STATUS.not_synced)
+                if (mNote.getSyncStatus() != DatabaseContract.NoteEntry.NOTE_STATUS.not_synced)
                 {
                     mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
                 }
             }
             mNote.setTitle(mTextTitle.getText().toString());
             mNote.setContent(Html.toHtml(mEditContent.getText()));
-            mNote.setUpdatedAt(Calendar.getInstance().getTime());
+            mNote.setUpdatedAt(DatabaseHelper.getCurrentTime());
 
             NoteDataSource.getInstance(this).insertNote(mNote);
 

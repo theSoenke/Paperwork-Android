@@ -7,8 +7,9 @@ import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
+import java.util.TimeZone;
 
 import rocks.paperwork.data.DatabaseContract.NoteEntry;
 import rocks.paperwork.data.DatabaseContract.NotebookEntry;
@@ -25,14 +26,19 @@ public class DatabaseHelper extends SQLiteOpenHelper
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Converts date from a String to a Date
+     *
+     * @param dateStr Date in UTC TimeZone
+     * @return Date in Locale TimeZone
+     */
     public static Date getDateTime(String dateStr)
     {
         Date date = null;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try
         {
             date = dateFormat.parse(dateStr);
-            date.getTime();
         }
         catch (ParseException e)
         {
@@ -42,10 +48,16 @@ public class DatabaseHelper extends SQLiteOpenHelper
         return date;
     }
 
-    public static String getDateTime(Date date)
+    public static String dateToString(Date date)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
+    }
+
+    public static Date getCurrentTime()
+    {
+        return Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
     }
 
     @Override
