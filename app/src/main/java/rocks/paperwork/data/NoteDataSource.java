@@ -81,23 +81,27 @@ public class NoteDataSource
         return count;
     }
 
-    public List<Note> getNotes(DatabaseContract.NoteEntry.NOTE_STATUS status)
+    public List<Note> getNotes(DatabaseContract.NoteEntry.NOTE_STATUS selection)
     {
         List<Note> notes = new ArrayList<>();
 
-        String selection = DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS + " = "
-                + status.ordinal();
+        String whereClause;
 
-        if(status == DatabaseContract.NoteEntry.NOTE_STATUS.all)
+        if (selection == null)
         {
-            selection = DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS + " != "
+            whereClause = DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS + " != "
                     + DatabaseContract.NoteEntry.NOTE_STATUS.deleted.ordinal();
+        }
+        else
+        {
+            whereClause = DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS + " = "
+                    + selection.ordinal();
         }
 
         Cursor cursor = mContext.getContentResolver().query(
                 DatabaseContract.NoteEntry.CONTENT_URI,
                 null,
-                selection,
+                whereClause,
                 null,
                 DatabaseContract.NoteEntry.COLUMN_UPDATED_AT + " DESC");
 

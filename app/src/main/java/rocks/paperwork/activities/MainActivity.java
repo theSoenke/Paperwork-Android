@@ -109,7 +109,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onChange(boolean selfChange)
                     {
-                        SyncAdapter.syncImmediately(MainActivity.this);
                         updateView();
                     }
                 });

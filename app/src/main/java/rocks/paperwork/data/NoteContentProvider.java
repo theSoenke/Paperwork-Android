@@ -274,10 +274,7 @@ public class NoteContentProvider extends ContentProvider
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        if (returnCount > 0)
-        {
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
+        getContext().getContentResolver().notifyChange(uri, null);
 
         return returnCount;
     }
@@ -315,10 +312,7 @@ public class NoteContentProvider extends ContentProvider
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        if (rowsDeleted > 0)
-        {
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
+        getContext().getContentResolver().notifyChange(uri, null);
         return rowsDeleted;
     }
 
@@ -350,10 +344,7 @@ public class NoteContentProvider extends ContentProvider
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        if (rowsUpdated != 0)
-        {
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
+        getContext().getContentResolver().notifyChange(uri, null);
         return rowsUpdated;
     }
 }

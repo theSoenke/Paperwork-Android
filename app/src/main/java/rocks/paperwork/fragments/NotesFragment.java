@@ -35,7 +35,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
 {
     private NotesAdapter mNotesAdapter;
     private TextView emptyText;
-    private static SwipeRefreshLayout sSwipeContainer;
+    private SwipeRefreshLayout mSwipeContainer;
     private Notebook mNotebook;
 
 
@@ -89,11 +89,10 @@ public class NotesFragment extends Fragment implements AsyncCallback
             }
         });
 
-        sSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
+        mSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
 
-        // TODO stop SwipeRefreshLayout when there a no changes
         // Setup refresh listener which triggers new data loading
-        sSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        mSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
         {
             @Override
             public void onRefresh()
@@ -126,15 +125,10 @@ public class NotesFragment extends Fragment implements AsyncCallback
         return view;
     }
 
-    public static void stopRefresh()
-    {
-        sSwipeContainer.setRefreshing(false);
-    }
-
     @Override
     public void updateView()
     {
-        sSwipeContainer.setRefreshing(false);
+        mSwipeContainer.setRefreshing(false);
         mNotesAdapter.clear();
 
         NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
@@ -146,7 +140,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
         }
         else
         {
-            notes = noteDataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.all);
+            notes = noteDataSource.getNotes(null);
         }
 
         mNotesAdapter.addAll(notes);
@@ -248,6 +242,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
                     {
                         note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
                         NoteDataSource.getInstance(getActivity()).insertNote(note);
+                        SyncAdapter.syncImmediately(getActivity());
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
