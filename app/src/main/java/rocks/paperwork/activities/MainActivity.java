@@ -3,7 +3,9 @@ package rocks.paperwork.activities;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,12 +20,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import rocks.paperwork.R;
+import rocks.paperwork.data.DatabaseContract;
 import rocks.paperwork.data.HostPreferences;
-import rocks.paperwork.data.NotesDataSource;
+import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.fragments.NotebooksFragment;
 import rocks.paperwork.fragments.NotesFragment;
 import rocks.paperwork.interfaces.AsyncCallback;
-import rocks.paperwork.network.SyncNotesTask;
+import rocks.paperwork.sync.SyncAdapter;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback
@@ -60,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         sInstance = this;
 
         if (!HostPreferences.preferencesExist(this))
@@ -101,7 +103,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
-        new SyncNotesTask(this).fetchAllData();
+        getContentResolver().registerContentObserver(
+                DatabaseContract.NoteEntry.CONTENT_URI, true, new ContentObserver(new Handler(getMainLooper()))
+                {
+                    @Override
+                    public void onChange(boolean selfChange)
+                    {
+                        updateView();
+                    }
+                });
+
+
+        SyncAdapter.syncImmediately(this);
     }
 
     private void setUpToolbar()
@@ -191,9 +204,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void logout()
     {
         HostPreferences.clearPreferences(this);
-        NotesDataSource.getInstance(this).deleteAll();
-        Intent hostMenuIntent = new Intent(this, LoginActivity.class);
-        startActivity(hostMenuIntent);
+        NoteDataSource.getInstance(this).deleteAll();
+        Intent loginIntent = new Intent(this, LoginActivity.class);
+        startActivity(loginIntent);
         finish();
     }
 

@@ -21,8 +21,14 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
@@ -38,11 +44,7 @@ import rocks.paperwork.data.HostPreferences;
  */
 public class LoginActivity extends Activity
 {
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-    // UI references.
+    private UserLoginTask mAuthTask = null; // Keep track of the login task to ensure we can cancel it if requested.
     private TextInputLayout mHostView;
     private TextInputLayout mEmailView;
     private TextInputLayout mPasswordView;
@@ -213,6 +215,21 @@ public class LoginActivity extends Activity
         }
     }
 
+    private void showTimeoutDialog()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.connection_error).setMessage(R.string.connection_error_message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -236,18 +253,39 @@ public class LoginActivity extends Activity
         protected Integer doInBackground(String... params)
         {
             HttpURLConnection urlConnection = null;
+            BufferedReader reader;
+            String jsonStr;
 
             try
             {
                 URL url = new URL(params[0]);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestProperty("Authorization", "Basic " + mHash);
-                urlConnection.setConnectTimeout(5000);
-                urlConnection.setReadTimeout(10000);
+                urlConnection.setConnectTimeout(10000);
+                urlConnection.setReadTimeout(20000);
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
 
-                urlConnection.getInputStream();
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuilder builder = new StringBuilder();
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null)
+                {
+                    builder.append(line).append("\n");
+                }
+                jsonStr = builder.toString();
+
+                JSONObject result = new JSONObject(jsonStr);
+                if (result.getBoolean("success"))
+                {
+                    return SUCCESS;
+                }
+                else
+                {
+                    return FILE_NOT_FOUND;
+                }
             }
             catch (SocketTimeoutException e)
             {
@@ -261,12 +299,18 @@ public class LoginActivity extends Activity
             }
             catch (FileNotFoundException e)
             {
+                Log.d(LOG_TAG, "FileNotFoundException");
                 return FILE_NOT_FOUND;
             }
             catch (SSLHandshakeException e)
             {
                 Log.d(LOG_TAG, "SSL Certificate is not valid");
                 return CONNECTION_FAILED;
+            }
+            catch (JSONException e)
+            {
+                Log.d(LOG_TAG, "Error parsing JSON");
+                return FILE_NOT_FOUND;
             }
             catch (IOException e)
             {
@@ -280,8 +324,6 @@ public class LoginActivity extends Activity
                     urlConnection.disconnect();
                 }
             }
-
-            return SUCCESS;
         }
 
         @Override
@@ -315,21 +357,6 @@ public class LoginActivity extends Activity
             mAuthTask = null;
             showProgress(false);
         }
-    }
-
-    private void showTimeoutDialog()
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.connection_error).setMessage(R.string.connection_error_message)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i)
-                    {
-                    }
-                });
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 }
 

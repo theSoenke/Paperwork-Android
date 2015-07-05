@@ -17,7 +17,7 @@ import rocks.paperwork.data.DatabaseContract.TagEntry;
 public class DatabaseHelper extends SQLiteOpenHelper
 {
     private static final String DATABASE_NAME = "notes.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String LOG_TAG = DatabaseHelper.class.getName();
 
     public DatabaseHelper(Context context)
@@ -52,24 +52,25 @@ public class DatabaseHelper extends SQLiteOpenHelper
     public void onCreate(SQLiteDatabase sqLiteDatabase)
     {
         final String SQL_CREATE_NOTEBOOK_TABLE = "CREATE TABLE " + NotebookEntry.TABLE_NAME +
-                " (" + NotebookEntry.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL," +
+                " (" + NotebookEntry._ID + " TEXT PRIMARY KEY NOT NULL," +
                 NotebookEntry.COLUMN_TITLE + " TEXT NOT NULL " +
                 " );";
 
         final String SQL_CREATE_NOTE_TABLE = "CREATE TABLE " + NoteEntry.TABLE_NAME +
-                " (" + NoteEntry.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL," +
+                " (" + NoteEntry._ID + " TEXT PRIMARY KEY NOT NULL," +
                 NoteEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
                 NoteEntry.COLUMN_CONTENT + " TEXT NOT NULL, " +
                 NoteEntry.COLUMN_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, " +
+                NoteEntry.COLUMN_SYNC_STATUS + " INTEGER NOT NULL DEFAULT 0, " +
                 NoteEntry.COLUMN_NOTEBOOK_KEY + " INTEGER NOT NULL, " +
 
                 " FOREIGN KEY (" + NoteEntry.COLUMN_NOTEBOOK_KEY + ") REFERENCES " +
                 NoteEntry.TABLE_NAME +
-                " (" + NoteEntry.COLUMN_ID + ") " +
+                " (" + NoteEntry._ID + ") " +
                 " );";
 
         final String SQL_CREATE_TAG_TABLE = "CREATE TABLE " + TagEntry.TABLE_NAME +
-                " (" + TagEntry.COLUMN_ID + " TEXT PRIMARY KEY NOT NULL," +
+                " (" + TagEntry._ID + " TEXT PRIMARY KEY NOT NULL," +
                 TagEntry.COLUMN_TITLE + " TEXT NOT NULL " +
                 " );";
 
@@ -81,7 +82,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1)
     {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS" + NoteEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + NoteEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + NotebookEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TagEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);

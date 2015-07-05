@@ -1,4 +1,9 @@
 <resources>
+
+    <!-- SyncAdapter -->
+    <string name="sync_account_type">paperwork.rocks</string>
+    <string name="content_authority">rocks.paperwork.app</string>
+
     <string name="app_name">Paperwork</string>
     <string name="no_notes">No notes</string>
     <string name="no_notebooks">No notes</string>
@@ -26,7 +31,7 @@
     <string name="connection_error_message">No connection to Paperwork possible.</string>
     <string name="note">note</string>
     <string name="notes">notes</string>
-    <string name="wait">Please wait...</string>
+    <string name="wait">Please wait…</string>
     <string name="edit">Edit</string>
     <string name="share">Share</string>
     <string name="add_tag">Add Tag</string>

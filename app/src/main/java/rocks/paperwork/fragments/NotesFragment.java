@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
@@ -23,29 +25,24 @@ import rocks.paperwork.activities.NoteActivity;
 import rocks.paperwork.adapters.NotebookAdapter.Notebook;
 import rocks.paperwork.adapters.NotesAdapter;
 import rocks.paperwork.adapters.NotesAdapter.Note;
-import rocks.paperwork.data.NotesDataSource;
+import rocks.paperwork.data.DatabaseContract;
+import rocks.paperwork.data.NoteDataSource;
 import rocks.paperwork.interfaces.AsyncCallback;
-import rocks.paperwork.network.SyncNotesTask;
+import rocks.paperwork.sync.SyncAdapter;
 
 
 public class NotesFragment extends Fragment implements AsyncCallback
 {
-    private static NotesFragment sInstance;
     private NotesAdapter mNotesAdapter;
     private TextView emptyText;
     private SwipeRefreshLayout mSwipeContainer;
     private Notebook mNotebook;
 
-    public static NotesFragment getInstance()
-    {
-        return sInstance;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
             savedInstanceState)
     {
-        sInstance = this;
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
 
         mNotesAdapter = new NotesAdapter(getActivity(), R.id.list_notebooks, new ArrayList<Note>());
@@ -100,7 +97,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
             @Override
             public void onRefresh()
             {
-                new SyncNotesTask(getActivity()).fetchAllData();
+                SyncAdapter.syncImmediately(getActivity());
             }
         });
 
@@ -113,7 +110,16 @@ public class NotesFragment extends Fragment implements AsyncCallback
             }
         }
 
-        // loads notes from the database
+        getActivity().getContentResolver().registerContentObserver(
+                DatabaseContract.NoteEntry.CONTENT_URI, true, new ContentObserver(new Handler(getActivity().getMainLooper()))
+                {
+                    @Override
+                    public void onChange(boolean selfChange)
+                    {
+                        updateView();
+                    }
+                });
+
         updateView();
 
         return view;
@@ -125,20 +131,19 @@ public class NotesFragment extends Fragment implements AsyncCallback
         mSwipeContainer.setRefreshing(false);
         mNotesAdapter.clear();
 
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(getActivity());
-        List<Note> allNotes;
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
+        List<Note> notes;
 
         if (mNotebook != null)
         {
-            allNotes = notesDataSource.getAllNotesFromNotebook(mNotebook);
+            notes = noteDataSource.getAllNotesFromNotebook(mNotebook);
         }
         else
         {
-            allNotes = notesDataSource.getAllNotes();
+            notes = noteDataSource.getNotes(null);
         }
 
-        mNotesAdapter.addAll(allNotes);
-        mNotesAdapter.notifyDataSetChanged();
+        mNotesAdapter.addAll(notes);
 
         if (mNotesAdapter.isEmpty())
         {
@@ -152,8 +157,8 @@ public class NotesFragment extends Fragment implements AsyncCallback
 
     private void showNotebookSelection()
     {
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(getActivity());
-        final List<Notebook> allNotebooks = notesDataSource.getAllNotebooks();
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
+        final List<Notebook> allNotebooks = noteDataSource.getAllNotebooks();
         CharSequence[] notebookChars = new CharSequence[allNotebooks.size()];
 
         for (int i = 0; i < allNotebooks.size(); i++)
@@ -185,7 +190,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
     private void viewNote(Note note, boolean editMode)
     {
         Intent viewNoteIntent = new Intent(getActivity(), NoteActivity.class);
-        viewNoteIntent.putExtra("NOTE", note);
+        viewNoteIntent.putExtra("NOTES", note);
         viewNoteIntent.putExtra("EditMode", editMode);
         startActivity(viewNoteIntent);
     }
@@ -235,7 +240,9 @@ public class NotesFragment extends Fragment implements AsyncCallback
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        new SyncNotesTask(getActivity()).deleteNote(note);
+                        note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
+                        NoteDataSource.getInstance(getActivity()).insertNote(note);
+                        SyncAdapter.syncImmediately(getActivity());
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
