@@ -27,7 +27,6 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -189,7 +188,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             if (result != null)
             {
                 localNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
-                localNote.setUpdatedAt(Calendar.getInstance().getTime());
+                localNote.setUpdatedAt(DatabaseHelper.getCurrentTime());
                 NoteDataSource.getInstance(getContext()).insertNote(localNote);
             }
         }
@@ -565,7 +564,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         /**
          * Syncs local and remote notes
          *
-         * @param localNotes Locally stored notes
+         * @param localNotes  Locally stored notes
          * @param remoteNotes Notes from the server
          * @return First list contains notes that need to be updated locally, second list of notes need to be updated on the server
          */
