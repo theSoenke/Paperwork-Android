@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import rocks.paperwork.data.DatabaseContract.NoteEntry;
@@ -35,7 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
     public static Date getDateTime(String dateStr)
     {
         Date date = null;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         try
         {
             date = dateFormat.parse(dateStr);
@@ -50,7 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
 
     public static String dateToString(Date date)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
     }

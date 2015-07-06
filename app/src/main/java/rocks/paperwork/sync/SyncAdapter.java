@@ -7,8 +7,11 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -23,8 +26,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,7 +45,8 @@ import rocks.paperwork.data.NoteDataSource;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter
 {
-    private final String LOG_TAG = SyncAdapter.class.getSimpleName();
+    private static final String LOG_TAG = SyncAdapter.class.getSimpleName();
+    private static SwipeRefreshLayout sSwipeContainer;
 
     public SyncAdapter(Context context, boolean autoInitialize)
     {
@@ -60,21 +62,38 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
                 context.getString(R.string.content_authority), bundle);
     }
 
+    public static void syncImmediately(Context context, SwipeRefreshLayout refreshLayout)
+    {
+        sSwipeContainer = refreshLayout;
+
+        if (!isNetworkAvailable(context))
+        {
+            sSwipeContainer.setRefreshing(false);
+            Log.d(LOG_TAG, "No internet available");
+            return;
+        }
+
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        ContentResolver.requestSync(getSyncAccount(context),
+                context.getString(R.string.content_authority), bundle);
+    }
+
     // TODO use paperwork account instead of fake account
     public static Account getSyncAccount(Context context)
     {
         // Get an instance of the Android account manager
-        AccountManager accountManager =
-                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+        AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
         // Create the account type and default account
         Account newAccount = new Account(
-                context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
+                context.getString(R.string.app_name),
+                context.getString(R.string.sync_account_type));
 
         // If the password doesn't exist, the account doesn't exist
         if (null == accountManager.getPassword(newAccount))
         {
-
         /*
          * Add the account and account type, no password or user data
          * If successful, return the Account object, otherwise report an error.
@@ -95,20 +114,40 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         String host = HostPreferences.readSharedSetting(getContext(), HostPreferences.HOST, "");
         String hash = HostPreferences.readSharedSetting(getContext(), HostPreferences.HASH, "");
 
-        if (host.isEmpty())
+        if (!HostPreferences.preferencesExist(getContext()))
         {
             Log.d(LOG_TAG, "No user is logged in");
             return;
         }
 
-        uploadNotes(host, hash);
-        deleteNotes(host, hash);
-        fetch(host, hash, NoteData.notebooks);
-        fetch(host, hash, NoteData.notes);
-        fetch(host, hash, NoteData.tags);
+        try
+        {
+            uploadNotes(host, hash);
+            deleteNotes(host, hash);
+            fetch(host, hash, NoteData.notebooks);
+            fetch(host, hash, NoteData.notes);
+            fetch(host, hash, NoteData.tags);
+        }
+        catch (JSONException e)
+        {
+            Log.d(LOG_TAG, "JSONException", e);
+        }
+        catch (FileNotFoundException e)
+        {
+            // FIXME workaround because response code is always 200, even if authentication failed
+            authenticationFailed();
+        }
+        catch (IOException e)
+        {
+            if (sSwipeContainer != null)
+            {
+                sSwipeContainer.setRefreshing(false);
+            }
+            Log.d(LOG_TAG, "Error syncing data", e);
+        }
     }
 
-    private void fetch(String host, String hash, NoteData data)
+    private void fetch(String host, String hash, NoteData data) throws IOException, JSONException
     {
         NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
         SyncManager syncManager = new SyncManager();
@@ -140,7 +179,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
     /**
      * Uploads all new notes
      */
-    private void uploadNotes(String host, String hash)
+    private void uploadNotes(String host, String hash) throws IOException, JSONException
     {
         NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
         List<Note> notSyncedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
@@ -163,7 +202,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
     /**
      * Delete notes on the server
      */
-    private void deleteNotes(String host, String hash)
+    private void deleteNotes(String host, String hash) throws IOException, JSONException
     {
         NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
         List<Note> deletedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
@@ -180,7 +219,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
      *
      * @param updatedNotes Notes that should be updated on the server
      */
-    private void updateNotes(String host, String hash, List<Note> updatedNotes)
+    private void updateNotes(String host, String hash, List<Note> updatedNotes) throws IOException, JSONException
     {
         for (Note localNote : updatedNotes)
         {
@@ -193,7 +232,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             }
         }
     }
-
 
     private Note parseNote(String jsonStr)
     {
@@ -313,17 +351,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         return tags;
     }
 
-    private String fetchTask(String path, String hash)
+    private String fetchTask(String path, String hash) throws IOException
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
-        String jsonStr = "";
+        String jsonStr;
 
         try
         {
             URL url = new URL(path);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty("Authorization", "Basic " + hash);
+            urlConnection.setConnectTimeout(10000);
+            urlConnection.setReadTimeout(15000);
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
@@ -347,24 +387,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             else if (responseCode != HttpURLConnection.HTTP_OK)
             {
                 Log.e(LOG_TAG, "Response code: " + urlConnection.getResponseCode());
+                throw new ConnectException();
             }
-        }
-        catch (SocketTimeoutException e)
-        {
-            Log.d(LOG_TAG, "Timeout");
-        }
-        catch (FileNotFoundException e)
-        {
-            // FIXME workaround because response code is always 200, even if authentication failed
-            authenticationFailed();
-        }
-        catch (ConnectException e)
-        {
-            Log.d(LOG_TAG, "Connection failed");
-        }
-        catch (IOException e)
-        {
-            Log.e(LOG_TAG, "IO Exception", e);
+            else
+            {
+                return jsonStr;
+            }
         }
         finally
         {
@@ -386,10 +414,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             }
         }
 
-        return jsonStr;
+        throw new ConnectException();
     }
 
-    private Note modifyNote(String host, String hash, Note note, ModifyNote task)
+    private Note modifyNote(String host, String hash, Note note, ModifyNote task) throws IOException, JSONException
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -416,8 +444,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             urlConnection.setRequestProperty("Accept", "application/json");
             urlConnection.setRequestProperty("Authorization", "Basic " + hash);
-            urlConnection.setConnectTimeout(5000);
-            urlConnection.setReadTimeout(10000);
+            urlConnection.setConnectTimeout(10000);
+            urlConnection.setReadTimeout(15000);
 
             // create json note
             JSONObject jsonNote = new JSONObject();
@@ -474,6 +502,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             else if (responseCode != HttpURLConnection.HTTP_OK)
             {
                 Log.d(LOG_TAG, "Error while creating note, response code: " + urlConnection.getResponseCode());
+                throw new ConnectException();
             }
             else
             {
@@ -481,7 +510,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 
                 if (!json.getBoolean("success"))
                 {
-                    return null;
+                    throw new ConnectException();
                 }
 
                 if (task == ModifyNote.create_note)
@@ -492,28 +521,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 
                 return new Note("");
             }
-        }
-        catch (JSONException e)
-        {
-            Log.e(LOG_TAG, "Error parsing JSON", e);
-        }
-        catch (MalformedURLException e)
-        {
-            Log.e(LOG_TAG, "Malformed URL: " + path);
-        }
-        catch (SocketTimeoutException e)
-        {
-            Log.d(LOG_TAG, "Timeout");
-        }
-        catch (FileNotFoundException e)
-        {
-            // FIXME workaround because response code is always 200, even if authentication failed
-            Log.d(LOG_TAG, "FileNotFound: " + path + task);
-            authenticationFailed();
-        }
-        catch (IOException e)
-        {
-            Log.e(LOG_TAG, "IOException", e);
         }
         finally
         {
@@ -536,13 +543,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         }
 
         Log.d(LOG_TAG, "Failed to modify note");
-        return null;
+        throw new ConnectException();
     }
 
     private void authenticationFailed()
     {
         // TODO handle authentication failure
-        Log.e(LOG_TAG, "Authentication failed");
+        Log.d(LOG_TAG, "Authentication failed");
     }
 
     private enum ModifyNote
@@ -557,6 +564,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         notes,
         notebooks,
         tags
+    }
+
+    private static boolean isNetworkAvailable(Context context)
+    {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
     }
 
     public class SyncManager
