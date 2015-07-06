@@ -97,7 +97,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
             @Override
             public void onRefresh()
             {
-                SyncAdapter.syncImmediately(getActivity());
+                SyncAdapter.syncImmediately(getActivity(), mSwipeContainer);
             }
         });
 
