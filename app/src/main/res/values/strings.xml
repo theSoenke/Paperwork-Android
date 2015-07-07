@@ -37,4 +37,17 @@
     <string name="add_tag">Add Tag</string>
     <string name="delete">Delete</string>
     <string name="delete_note_message">Are you sure that you want to delete this note?</string>
+
+    <!-- Strings related to login -->
+    <string name="title_activity_login">Sign in</string>
+    <string name="auth_host_url">Server address https://…</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+
+    <string name="error_invalid_url">This url is invalid</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">Password or email is incorrect</string>
+    <string name="error_field_required">This field is required</string>
 </resources>
