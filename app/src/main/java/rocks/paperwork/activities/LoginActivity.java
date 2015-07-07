@@ -1,9 +1,7 @@
 package rocks.paperwork.activities;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -66,7 +64,7 @@ public class LoginActivity extends Activity
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent)
             {
-                if (id == R.id.login || id == EditorInfo.IME_NULL)
+                if (id == R.id.login || id == EditorInfo.IME_ACTION_DONE)
                 {
                     attemptLogin();
                     return true;
@@ -215,21 +213,6 @@ public class LoginActivity extends Activity
         }
     }
 
-    private void showTimeoutDialog()
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.connection_error).setMessage(R.string.connection_error_message)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i)
-                    {
-                    }
-                });
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -253,7 +236,7 @@ public class LoginActivity extends Activity
         protected Integer doInBackground(String... params)
         {
             HttpURLConnection urlConnection = null;
-            BufferedReader reader;
+            BufferedReader reader = null;
             String jsonStr;
 
             try
@@ -323,6 +306,18 @@ public class LoginActivity extends Activity
                 {
                     urlConnection.disconnect();
                 }
+
+                if (reader != null)
+                {
+                    try
+                    {
+                        reader.close();
+                    }
+                    catch (final IOException e)
+                    {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
             }
         }
 
@@ -344,7 +339,8 @@ public class LoginActivity extends Activity
             else
             {
                 HostPreferences.clearPreferences(LoginActivity.this);
-                showTimeoutDialog();
+                mHostView.setError(getString(R.string.timeout_error));
+                mHostView.requestFocus();
             }
 
             mAuthTask = null;
