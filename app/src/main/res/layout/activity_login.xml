@@ -81,8 +81,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/auth_password"
+                    android:imeOptions="actionDone"
                     android:imeActionId="@+id/login"
-                    android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
                     android:maxLines="1"
                     android:singleLine="true"/>

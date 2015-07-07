@@ -27,8 +27,7 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="empty_title_error">Title cannot be empty</string>
-    <string name="connection_error">Connection failed</string>
-    <string name="connection_error_message">No connection to Paperwork possible.</string>
+    <string name="timeout_error">The server is not responding</string>
     <string name="note">note</string>
     <string name="notes">notes</string>
     <string name="wait">Please wait…</string>
