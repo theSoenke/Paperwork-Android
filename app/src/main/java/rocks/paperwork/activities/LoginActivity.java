@@ -57,7 +57,7 @@ public class LoginActivity extends Activity
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
-        mHostView = (TextInputLayout) findViewById(R.id.host);
+        mHostView = (TextInputLayout) findViewById(R.id.host_url);
         mEmailView = (TextInputLayout) findViewById(R.id.email);
         mPasswordView = (TextInputLayout) findViewById(R.id.password);
 
