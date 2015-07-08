@@ -6,7 +6,6 @@
 
     <string name="app_name">Paperwork</string>
     <string name="no_notes">No notes</string>
-    <string name="no_notebooks">No notes</string>
     <string name="empty_title_hint">Your note title</string>
     <string name="empty_note_hint">Write your note</string>
     <string name="empty_note">Note was not saved</string>
@@ -46,7 +45,6 @@
 
     <string name="error_invalid_url">This url is invalid</string>
     <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">Password or email is incorrect</string>
     <string name="error_field_required">This field is required</string>
 </resources>
