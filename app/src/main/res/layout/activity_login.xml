@@ -5,7 +5,7 @@
               android:layout_height="match_parent"
               android:gravity="center_horizontal"
               android:orientation="vertical"
-              tools:context="rocks.paperwork.activities.LoginActivity">
+              tools:context="rocks.paperwork.android.activities.LoginActivity">
 
 
     <android.support.v7.widget.Toolbar
