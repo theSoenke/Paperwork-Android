@@ -37,7 +37,7 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         View rowView = inflater.inflate(R.layout.note_item, parent, false);
 
         TextView noteTitle = (TextView) rowView.findViewById(R.id.note_title);
-        TextView notePreview = (TextView) rowView.findViewById(R.id.note_edit_content);
+        TextView notePreview = (TextView) rowView.findViewById(R.id.note_preview);
         TextView noteDay = (TextView) rowView.findViewById(R.id.note_day);
         TextView noteMonth = (TextView) rowView.findViewById(R.id.note_month);
         TextView noteYear = (TextView) rowView.findViewById(R.id.note_year);

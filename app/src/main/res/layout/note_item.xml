@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:paddingTop="5dp">
-
+              android:layout_height="match_parent">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/ripple"
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
 
@@ -62,7 +61,7 @@
             android:background="@color/gray"/>
 
         <TextView
-            android:id="@+id/note_edit_content"
+            android:id="@+id/note_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/note_date"
