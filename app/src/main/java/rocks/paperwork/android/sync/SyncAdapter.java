@@ -148,7 +148,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             {
                 sSwipeContainer.setRefreshing(false);
             }
-            Log.d(LOG_TAG, "Error syncing data");
         }
     }
 
