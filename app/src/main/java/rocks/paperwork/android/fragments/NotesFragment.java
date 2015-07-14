@@ -33,6 +33,8 @@ import rocks.paperwork.android.sync.SyncAdapter;
 
 public class NotesFragment extends Fragment implements AsyncCallback
 {
+    public static final String KEY_NOTEBOOK = "notebook";
+    public static final String KEY_SEARCH_MODE = "search_mode";
     private NotesAdapter mNotesAdapter;
     private TextView emptyText;
     private SwipeRefreshLayout mSwipeContainer;
@@ -45,12 +47,12 @@ public class NotesFragment extends Fragment implements AsyncCallback
     {
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
 
-        mNotesAdapter = new NotesAdapter(getActivity(), R.id.list_notebooks, new ArrayList<Note>());
+        mNotesAdapter = new NotesAdapter(getActivity(), R.id.list_notes, new ArrayList<Note>());
 
-        ListView notesList = (ListView) view.findViewById(R.id.list_notebooks);
+        ListView notesList = (ListView) view.findViewById(R.id.list_notes);
         notesList.setAdapter(mNotesAdapter);
 
-        FloatingActionButton addNote = (FloatingActionButton) view.findViewById(R.id.add_notebook);
+        FloatingActionButton addNote = (FloatingActionButton) view.findViewById(R.id.add_note);
 
         emptyText = (TextView) view.findViewById(R.id.empty);
 
@@ -101,12 +103,19 @@ public class NotesFragment extends Fragment implements AsyncCallback
             }
         });
 
+        boolean isSearchMode = false;
         Bundle bundle = getArguments();
         if (bundle != null)
         {
-            if (bundle.containsKey("Notebook"))
+            if (bundle.containsKey(KEY_NOTEBOOK))
             {
-                mNotebook = (Notebook) bundle.getSerializable("Notebook");
+                mNotebook = (Notebook) bundle.getSerializable(KEY_NOTEBOOK);
+            }
+
+            if (bundle.containsKey(KEY_SEARCH_MODE))
+            {
+                isSearchMode = bundle.getBoolean(KEY_SEARCH_MODE);
+                addNote.setVisibility(isSearchMode ? View.GONE : View.VISIBLE);
             }
         }
 
@@ -120,7 +129,14 @@ public class NotesFragment extends Fragment implements AsyncCallback
                     }
                 });
 
-        updateView();
+        if (isSearchMode)
+        {
+            mSwipeContainer.setEnabled(false);
+        }
+        else
+        {
+            updateView();
+        }
 
         return view;
     }
@@ -155,10 +171,14 @@ public class NotesFragment extends Fragment implements AsyncCallback
         }
     }
 
-    public void showSearchResults(List<Note> notes)
+    public void searchNotes(String query)
     {
-        mNotesAdapter.clear();
-        mNotesAdapter.addAll(notes);
+        if (!query.isEmpty())
+        {
+            mNotesAdapter.clear();
+            List<Note> searchResult = NoteDataSource.getInstance(getActivity()).searchNotes(query);
+            mNotesAdapter.addAll(searchResult);
+        }
     }
 
     private void showNotebookSelection()
@@ -188,16 +208,16 @@ public class NotesFragment extends Fragment implements AsyncCallback
     private void createNewNote(Notebook notebook)
     {
         Intent editNoteIntent = new Intent(getActivity(), NoteActivity.class);
-        editNoteIntent.putExtra("NotebookId", notebook.getId());
-        editNoteIntent.putExtra("EditMode", true);
+        editNoteIntent.putExtra(NoteActivity.KEY_NOTEBOOK_ID, notebook.getId());
+        editNoteIntent.putExtra(NoteActivity.KEY_EDIT_MODE, true);
         startActivity(editNoteIntent);
     }
 
     private void viewNote(Note note, boolean editMode)
     {
         Intent viewNoteIntent = new Intent(getActivity(), NoteActivity.class);
-        viewNoteIntent.putExtra("NOTES", note);
-        viewNoteIntent.putExtra("EditMode", editMode);
+        viewNoteIntent.putExtra(NoteActivity.KEY_NOTE, note);
+        viewNoteIntent.putExtra(NoteActivity.KEY_EDIT_MODE, editMode);
         startActivity(viewNoteIntent);
     }
 
