@@ -12,10 +12,10 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.widget.TextView;
 
@@ -29,7 +29,7 @@ import rocks.paperwork.android.interfaces.AsyncCallback;
 import rocks.paperwork.android.sync.SyncAdapter;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback, SearchView.OnQueryTextListener
 {
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static MainActivity sInstance;
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar mToolbar;
     private int mCurrentSelectedPosition;
     private boolean mUserLearnedDrawer;
-    private SubMenu mTagMenu;
+    private SearchView mSearchView;
 
     public static MainActivity getInstance()
     {
@@ -168,14 +168,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (!mNavigationView.isShown())
-        {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            return true;
-        }
+        getMenuInflater().inflate(R.menu.main, menu);
+
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setOnQueryTextListener(this);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -188,11 +185,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_search)
-        {
-            return true;
-        }
-        else if (id == R.id.action_logout)
+        if (id == R.id.action_logout)
         {
             logout();
             return true;
@@ -265,5 +258,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         {
             mTagMenu.add(tag.getTitle());
         }*/
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query)
+    {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText)
+    {
+        // TODO search notes
+        return false;
     }
 }

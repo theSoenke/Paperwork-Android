@@ -8,7 +8,9 @@
 
     <item
         android:id="@+id/action_search"
-        android:icon="@mipmap/ic_search"
+        android:icon="@drawable/abc_ic_search_api_mtrl_alpha"
         android:title="@string/search"
-        app:showAsAction="always"/>
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:iconifiedByDefault="true"
+        app:showAsAction="ifRoom|collapseActionView"/>
 </menu>
