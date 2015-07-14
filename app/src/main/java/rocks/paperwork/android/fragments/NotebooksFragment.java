@@ -49,7 +49,7 @@ public class NotebooksFragment extends Fragment implements AsyncCallback
                 getActivity().setTitle(notebook.getTitle());
                 Fragment fragment = Fragment.instantiate(getActivity(), NotesFragment.class.getName());
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("Notebook", notebook);
+                bundle.putSerializable(NotesFragment.KEY_NOTEBOOK, notebook);
                 fragment.setArguments(bundle);
                 (getFragmentManager().beginTransaction().replace(R.id.main_container, fragment)).commit();
             }

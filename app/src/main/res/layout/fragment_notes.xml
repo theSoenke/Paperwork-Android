@@ -22,7 +22,7 @@
         android:layout_marginTop="50dp">
 
         <ListView
-            android:id="@+id/list_notebooks"
+            android:id="@+id/list_notes"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
@@ -33,7 +33,7 @@
 
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/add_notebook"
+        android:id="@+id/add_note"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

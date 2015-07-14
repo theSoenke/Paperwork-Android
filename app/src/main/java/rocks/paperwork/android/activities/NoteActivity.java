@@ -29,6 +29,10 @@ import rocks.paperwork.android.sync.SyncAdapter;
 
 public class NoteActivity extends AppCompatActivity
 {
+    public static final String KEY_NOTE = "note";
+    public static final String KEY_EDIT_MODE = "edit_mode";
+    public static final String KEY_NOTEBOOK_ID = "notebook_id";
+
     private final String LOG_TAG = NoteActivity.class.getName();
     private Toolbar mToolbar;
     private Note mNote;
@@ -65,9 +69,9 @@ public class NoteActivity extends AppCompatActivity
             }
         });
 
-        if (getIntent().hasExtra("NOTES"))
+        if (getIntent().hasExtra(KEY_NOTE))
         {
-            mNote = (NotesAdapter.Note) getIntent().getExtras().getSerializable("NOTES");
+            mNote = (NotesAdapter.Note) getIntent().getExtras().getSerializable(KEY_NOTE);
             mTextTitle.setText(mNote.getTitle());
 
             String content = mNote.getContent();
@@ -78,9 +82,9 @@ public class NoteActivity extends AppCompatActivity
             mNewNote = true;
         }
 
-        if (getIntent().hasExtra("EditMode"))
+        if (getIntent().hasExtra(KEY_EDIT_MODE))
         {
-            mEditMode = getIntent().getExtras().getBoolean("EditMode");
+            mEditMode = getIntent().getExtras().getBoolean(KEY_EDIT_MODE);
         }
         else
         {
@@ -259,7 +263,7 @@ public class NoteActivity extends AppCompatActivity
             {
                 mNote = new Note(UUID.randomUUID().toString());
                 mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
-                String notebookId = (String) getIntent().getExtras().getSerializable("NotebookId");
+                String notebookId = (String) getIntent().getExtras().getSerializable(KEY_NOTEBOOK_ID);
                 mNote.setNotebookId(notebookId);
             }
             else

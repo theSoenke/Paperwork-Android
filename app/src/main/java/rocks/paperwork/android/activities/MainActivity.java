@@ -12,17 +12,13 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.List;
-
 import rocks.paperwork.android.R;
-import rocks.paperwork.android.adapters.NotesAdapter;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.HostPreferences;
 import rocks.paperwork.android.data.NoteDataSource;
@@ -32,7 +28,7 @@ import rocks.paperwork.android.interfaces.AsyncCallback;
 import rocks.paperwork.android.sync.SyncAdapter;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback, SearchView.OnQueryTextListener
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback
 {
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static MainActivity sInstance;
@@ -40,7 +36,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar mToolbar;
     private int mCurrentSelectedPosition;
     private boolean mUserLearnedDrawer;
-    private NotesFragment mNotesFragment;
 
     public static MainActivity getInstance()
     {
@@ -171,10 +166,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu)
     {
         getMenuInflater().inflate(R.menu.main, menu);
-
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setOnQueryTextListener(this);
-
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -191,6 +182,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         {
             logout();
             return true;
+        }
+        else if (id == R.id.action_search)
+        {
+            Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
+            startActivity(searchIntent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -219,7 +215,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragment = Fragment.instantiate(MainActivity.this, NotesFragment.class.getName());
                 (fm.beginTransaction().replace(R.id.main_container, fragment)).commit();
                 mCurrentSelectedPosition = 0;
-                mNotesFragment = (NotesFragment) fragment;
                 break;
             case R.id.nav_notebooks:
                 setTitle(getString(R.string.notebooks));
@@ -261,27 +256,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         {
             mTagMenu.add(tag.getTitle());
         }*/
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String query)
-    {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText)
-    {
-        if (!newText.isEmpty())
-        {
-            List<NotesAdapter.Note> resultNotes = NoteDataSource.getInstance(this).searchNotes(newText);
-
-            if (mNotesFragment != null)
-            {
-                mNotesFragment.showSearchResults(resultNotes);
-            }
-        }
-
-        return false;
     }
 }
