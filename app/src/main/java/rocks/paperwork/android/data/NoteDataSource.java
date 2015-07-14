@@ -265,6 +265,48 @@ public class NoteDataSource
         mContext.getContentResolver().bulkInsert(DatabaseContract.NoteEntry.CONTENT_URI, contentValues);
     }
 
+    public List<Note> searchNotes(String query)
+    {
+        // TODO use FTS for search
+
+        List<Note> notes = new ArrayList<>();
+        String selection = DatabaseContract.NoteEntry.COLUMN_CONTENT + " LIKE '%" + query + "%'"
+                + "OR " + DatabaseContract.NoteEntry.COLUMN_TITLE + " LIKE '%" + query + "%'";
+
+        Cursor cursor = mContext.getContentResolver().query(DatabaseContract.NoteEntry.CONTENT_URI,
+                null,
+                selection,
+                null,
+                null);
+
+        try
+        {
+            int uuidColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry._ID);
+            int titleColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_TITLE);
+            int contentColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_CONTENT);
+            int updatedAtColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT);
+            int syncColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS);
+            int notebookColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY);
+
+            while (cursor.moveToNext())
+            {
+                Note note = new Note(cursor.getString(uuidColumn));
+                note.setTitle(cursor.getString(titleColumn));
+                note.setContent(cursor.getString(contentColumn));
+                Date date = DatabaseHelper.getDateTime(cursor.getString(updatedAtColumn));
+                note.setUpdatedAt(date);
+                note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.values()[cursor.getInt(syncColumn)]);
+                note.setNotebookId(cursor.getString(notebookColumn));
+                notes.add(note);
+            }
+        }
+        finally
+        {
+            cursor.close();
+        }
+        return notes;
+    }
+
     public void insertTag(Tag tag)
     {
         ContentValues values = new ContentValues();

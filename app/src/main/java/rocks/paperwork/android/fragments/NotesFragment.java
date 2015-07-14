@@ -155,6 +155,12 @@ public class NotesFragment extends Fragment implements AsyncCallback
         }
     }
 
+    public void showSearchResults(List<Note> notes)
+    {
+        mNotesAdapter.clear();
+        mNotesAdapter.addAll(notes);
+    }
+
     private void showNotebookSelection()
     {
         NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
