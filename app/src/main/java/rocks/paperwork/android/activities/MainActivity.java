@@ -19,7 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.List;
+
 import rocks.paperwork.android.R;
+import rocks.paperwork.android.adapters.NotesAdapter;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.HostPreferences;
 import rocks.paperwork.android.data.NoteDataSource;
@@ -33,12 +36,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 {
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static MainActivity sInstance;
-    private NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
     private Toolbar mToolbar;
     private int mCurrentSelectedPosition;
     private boolean mUserLearnedDrawer;
-    private SearchView mSearchView;
+    private NotesFragment mNotesFragment;
 
     public static MainActivity getInstance()
     {
@@ -76,9 +78,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.nav_drawer);
-        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
         mUserLearnedDrawer = Boolean.valueOf(HostPreferences.readSharedSetting(this, HostPreferences.PREF_USER_LEARNED_DRAWER, "false"));
-        mNavigationView.setNavigationItemSelectedListener(this);
+        navigationView.setNavigationItemSelectedListener(this);
 
         String email = HostPreferences.readSharedSetting(this, "email", "");
         TextView userEmail = (TextView) findViewById(R.id.user_email);
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         }
 
-        Menu menu = mNavigationView.getMenu();
+        Menu menu = navigationView.getMenu();
         menu.getItem(mCurrentSelectedPosition).setChecked(true);
         onNavigationItemSelected(menu.getItem(mCurrentSelectedPosition));
 
@@ -170,8 +172,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     {
         getMenuInflater().inflate(R.menu.main, menu);
 
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        mSearchView.setOnQueryTextListener(this);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setOnQueryTextListener(this);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -217,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragment = Fragment.instantiate(MainActivity.this, NotesFragment.class.getName());
                 (fm.beginTransaction().replace(R.id.main_container, fragment)).commit();
                 mCurrentSelectedPosition = 0;
+                mNotesFragment = (NotesFragment) fragment;
                 break;
             case R.id.nav_notebooks:
                 setTitle(getString(R.string.notebooks));
@@ -269,7 +272,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onQueryTextChange(String newText)
     {
-        // TODO search notes
+        if (!newText.isEmpty())
+        {
+            List<NotesAdapter.Note> resultNotes = NoteDataSource.getInstance(this).searchNotes(newText);
+
+            if (mNotesFragment != null)
+            {
+                mNotesFragment.showSearchResults(resultNotes);
+            }
+        }
+
         return false;
     }
 }
