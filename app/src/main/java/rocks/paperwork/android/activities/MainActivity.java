@@ -15,10 +15,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.List;
+
 import rocks.paperwork.android.R;
+import rocks.paperwork.android.adapters.Tag;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.HostPreferences;
 import rocks.paperwork.android.data.NoteDataSource;
@@ -36,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar mToolbar;
     private int mCurrentSelectedPosition;
     private boolean mUserLearnedDrawer;
+    private NavigationView mNavigationView;
+    private SubMenu mTagMenu;
 
     public static MainActivity getInstance()
     {
@@ -73,9 +79,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.nav_drawer);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mUserLearnedDrawer = Boolean.valueOf(HostPreferences.readSharedSetting(this, HostPreferences.PREF_USER_LEARNED_DRAWER, "false"));
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
         String email = HostPreferences.readSharedSetting(this, "email", "");
         TextView userEmail = (TextView) findViewById(R.id.user_email);
@@ -89,9 +95,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         }
 
-        Menu menu = navigationView.getMenu();
+        Menu menu = mNavigationView.getMenu();
         menu.getItem(mCurrentSelectedPosition).setChecked(true);
         onNavigationItemSelected(menu.getItem(mCurrentSelectedPosition));
+
+        mTagMenu = menu.addSubMenu(R.string.tags);
 
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar,
@@ -238,23 +246,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void updateView()
     {
         // TODO put in the right place and set tag icons
-
-        /*
-
-        NotesDataSource notesDataSource = NotesDataSource.getInstance(this);
+        NoteDataSource notesDataSource = NoteDataSource.getInstance(this);
         List<Tag> tags = notesDataSource.getAllTags();
-
-        if (mTagMenu == null)
-        {
-            Menu menu = mNavigationView.getMenu();
-            mTagMenu = menu.addSubMenu(R.string.tags);
-        }
 
         mTagMenu.clear();
 
         for (Tag tag : tags)
         {
             mTagMenu.add(tag.getTitle());
-        }*/
+        }
     }
 }

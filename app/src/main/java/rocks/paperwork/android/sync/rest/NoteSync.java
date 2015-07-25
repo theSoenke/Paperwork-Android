@@ -325,8 +325,7 @@ public class NoteSync
         {
             updateNote(host, hash, localNote);
             localNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
-            localNote.setUpdatedAt(DatabaseHelper.getCurrentTime());
-            NoteDataSource.getInstance(context).insertNote(localNote);
+            NoteDataSource.getInstance(context).updateNote(localNote);
         }
     }
 

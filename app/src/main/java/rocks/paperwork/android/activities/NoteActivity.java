@@ -38,7 +38,6 @@ public class NoteActivity extends AppCompatActivity
     private Note mNote;
     private EditText mTextTitle;
     private EditText mEditContent;
-    private boolean mNewNote;
     private boolean mEditMode;
     private FloatingActionButton mEditNoteButton;
 
@@ -76,10 +75,6 @@ public class NoteActivity extends AppCompatActivity
 
             String content = mNote.getContent();
             mEditContent.setText(Html.fromHtml(content));
-        }
-        else
-        {
-            mNewNote = true;
         }
 
         if (getIntent().hasExtra(KEY_EDIT_MODE))
@@ -176,12 +171,12 @@ public class NoteActivity extends AppCompatActivity
                 }
             }
 
-            if (mEditMode && !mNewNote)
+            if (mEditMode && mNote != null)
             {
                 setNoteResult();
                 setMode(false);
             }
-            else if (mEditMode && mNewNote)
+            else if (mEditMode && mNote == null)
             {
                 setNoteResult();
                 onBackPressed();
@@ -195,7 +190,7 @@ public class NoteActivity extends AppCompatActivity
         }
         else if (id == R.id.action_delete)
         {
-            if (mNewNote)
+            if (mNote == null)
             {
                 onBackPressed();
                 finish();
@@ -259,25 +254,31 @@ public class NoteActivity extends AppCompatActivity
     {
         if (changesToSave())
         {
-            if (mNewNote)
+            if (mNote == null)
             {
                 mNote = new Note(UUID.randomUUID().toString());
                 mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
                 String notebookId = (String) getIntent().getExtras().getSerializable(KEY_NOTEBOOK_ID);
                 mNote.setNotebookId(notebookId);
+                mNote.setTitle(mTextTitle.getText().toString());
+                mNote.setContent(Html.toHtml(mEditContent.getText()));
+                mNote.setUpdatedAt(DatabaseHelper.getCurrentTime());
+
+                NoteDataSource.getInstance(this).insertNote(mNote);
             }
             else
             {
+                mNote.setTitle(mTextTitle.getText().toString());
+                mNote.setContent(Html.toHtml(mEditContent.getText()));
+                mNote.setUpdatedAt(DatabaseHelper.getCurrentTime());
+
                 if (mNote.getSyncStatus() != DatabaseContract.NoteEntry.NOTE_STATUS.not_synced)
                 {
                     mNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
                 }
-            }
-            mNote.setTitle(mTextTitle.getText().toString());
-            mNote.setContent(Html.toHtml(mEditContent.getText()));
-            mNote.setUpdatedAt(DatabaseHelper.getCurrentTime());
 
-            NoteDataSource.getInstance(this).insertNote(mNote);
+                NoteDataSource.getInstance(this).updateNote(mNote);
+            }
 
             SyncAdapter.syncImmediately(NoteActivity.this);
         }
@@ -288,7 +289,7 @@ public class NoteActivity extends AppCompatActivity
     {
         if (mEditMode)
         {
-            if (!changesToSave() && mNewNote)
+            if (!changesToSave() && mNote == null)
             {
                 super.onBackPressed();
             }
