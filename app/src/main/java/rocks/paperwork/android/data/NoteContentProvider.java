@@ -151,7 +151,7 @@ public class NoteContentProvider extends ContentProvider
         {
             case NOTES:
             {
-                long _id = db.replace(DatabaseContract.NoteEntry.TABLE_NAME, null, contentValues);
+                long _id = db.insert(DatabaseContract.NoteEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0)
                 {
                     returnUri = DatabaseContract.NoteEntry.buildNoteUri(_id);
@@ -165,7 +165,7 @@ public class NoteContentProvider extends ContentProvider
             }
             case NOTEBOOKS:
             {
-                long _id = db.replace(DatabaseContract.NotebookEntry.TABLE_NAME, null, contentValues);
+                long _id = db.insert(DatabaseContract.NotebookEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0)
                 {
                     returnUri = DatabaseContract.NotebookEntry.buildNotebookUri(_id);
@@ -178,7 +178,7 @@ public class NoteContentProvider extends ContentProvider
             }
             case TAGS:
             {
-                long _id = db.replace(DatabaseContract.TagEntry.TABLE_NAME, null, contentValues);
+                long _id = db.insert(DatabaseContract.TagEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0)
                 {
                     returnUri = DatabaseContract.TagEntry.buildTagUri(_id);

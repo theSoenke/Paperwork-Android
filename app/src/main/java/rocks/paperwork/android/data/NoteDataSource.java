@@ -243,6 +243,22 @@ public class NoteDataSource
         mContext.getContentResolver().insert(DatabaseContract.NoteEntry.CONTENT_URI, values);
     }
 
+    public void updateNote(Note note)
+    {
+        String selection = DatabaseContract.NoteEntry._ID + " = '" + note.getId() + "'";
+
+        ContentValues values = new ContentValues();
+
+        values.put(DatabaseContract.NoteEntry._ID, note.getId());
+        values.put(DatabaseContract.NoteEntry.COLUMN_TITLE, note.getTitle());
+        values.put(DatabaseContract.NoteEntry.COLUMN_CONTENT, note.getContent());
+        values.put(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT, DatabaseHelper.dateToString(note.getUpdatedAt()));
+        values.put(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS, note.getSyncStatus().ordinal());
+        values.put(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY, note.getNotebookId());
+
+        mContext.getContentResolver().update(DatabaseContract.NoteEntry.CONTENT_URI, values, selection, null);
+    }
+
     public void bulkInsertNotes(List<Note> notes)
     {
         ContentValues[] contentValues = new ContentValues[notes.size()];

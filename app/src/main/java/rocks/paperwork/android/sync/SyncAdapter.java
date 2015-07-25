@@ -11,7 +11,6 @@ import android.content.SyncResult;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 
@@ -40,13 +39,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
     public SyncAdapter(Context context, boolean autoInitialize)
     {
         super(context, autoInitialize);
-    }
-
-    private enum NoteData
-    {
-        notes,
-        notebooks,
-        tags
     }
 
     public static void syncImmediately(Context context)
@@ -100,6 +92,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             }
         }
         return newAccount;
+    }
+
+    private static boolean isNetworkAvailable(Context context)
+    {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
     }
 
     @Override
@@ -162,9 +161,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             List<Note> remoteNotes = NoteSync.parseNotes(result);
             List<Note> localNotes = dataSource.getNotes(null);
 
-            Pair<List<Note>, List<Note>> syncedNotes = syncManager.syncNotes(localNotes, remoteNotes);
-            dataSource.bulkInsertNotes(syncedNotes.first);
-            NoteSync.updateNotes(getContext(), host, hash, syncedNotes.second);
+            SyncManager.NotesToSync notesToSync = syncManager.syncNotes(localNotes, remoteNotes);
+            dataSource.bulkInsertNotes(notesToSync.remoteNewNotes);
+            NoteSync.updateNotes(getContext(), host, hash, notesToSync.locallyUpdatedNotes);
+
+            for (Note note : notesToSync.remoteUpdatedNotes)
+            {
+                dataSource.updateNote(note);
+            }
         }
         else if (data == NoteData.notebooks)
         {
@@ -186,10 +190,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         Log.d(LOG_TAG, "Authentication failed");
     }
 
-    private static boolean isNetworkAvailable(Context context)
+    private enum NoteData
     {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null;
+        notes,
+        notebooks,
+        tags
     }
 }
