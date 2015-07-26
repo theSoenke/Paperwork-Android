@@ -8,11 +8,11 @@
         android:id="@+id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_gravity="center"
         android:text="@string/no_notes"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
-
+        android:textSize="18sp"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipeContainer"
