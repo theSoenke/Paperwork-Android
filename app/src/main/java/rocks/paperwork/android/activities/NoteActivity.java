@@ -231,7 +231,7 @@ public class NoteActivity extends AppCompatActivity
 
         if (mNote == null) // note does not exist yet
         {
-            if (!content.isEmpty() || title.isEmpty())
+            if (!content.isEmpty() || !title.isEmpty())
             {
                 return true;
             }
