@@ -11,13 +11,16 @@
         <item name="color">@android:color/white</item>
     </style>
 
-    <style name="ToolBarStyle" parent="">
-    </style>
+    <style name="ToolBarStyle" parent="" />
 
     <style name="AppTheme.Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <!-- Set proper title size -->
         <item name="android:textSize">@dimen/abc_text_size_title_material_toolbar</item>
         <!-- Set title color -->
         <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="Button" parent="Base.Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button</item>
     </style>
 </resources>
