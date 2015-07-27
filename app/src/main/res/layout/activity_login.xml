@@ -1,11 +1,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center_horizontal"
-              android:orientation="vertical"
-              tools:context="rocks.paperwork.android.activities.LoginActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    tools:context="rocks.paperwork.android.activities.LoginActivity">
 
 
     <android.support.v7.widget.Toolbar
@@ -18,15 +18,14 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:title="@string/action_sign_in"
-        app:titleTextAppearance="@style/AppTheme.Toolbar.Title"/>
+        app:titleTextAppearance="@style/AppTheme.Toolbar.Title" />
 
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        >
+        android:paddingRight="16dp">
 
         <LinearLayout
             android:id="@+id/email_login_form"
@@ -53,7 +52,7 @@
                     android:hint="@string/auth_host_url"
                     android:inputType="textUri"
                     android:maxLines="1"
-                    android:singleLine="true"/>
+                    android:singleLine="true" />
             </android.support.design.widget.TextInputLayout>
 
 
@@ -68,7 +67,7 @@
                     android:hint="@string/auth_email"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
-                    android:singleLine="true"/>
+                    android:singleLine="true" />
             </android.support.design.widget.TextInputLayout>
 
 
@@ -81,29 +80,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/auth_password"
-                    android:imeOptions="actionDone"
                     android:imeActionId="@+id/login"
+                    android:imeOptions="actionDone"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:singleLine="true"/>
+                    android:singleLine="true" />
             </android.support.design.widget.TextInputLayout>
 
 
             <Button
                 android:id="@+id/sign_in_button"
+                style="@style/Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/button"
                 android:text="@string/action_sign_in"
-                android:textColor="@color/clouds"/>
+                android:textColor="@color/clouds" />
 
-            <!--<Button
-                android:id="@+id/register_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/action_sign_up"/>-->
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
