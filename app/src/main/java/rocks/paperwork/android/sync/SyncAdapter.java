@@ -11,6 +11,8 @@ import android.content.SyncResult;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 
@@ -56,7 +58,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 
         if (!isNetworkAvailable(context))
         {
-            sSwipeContainer.setRefreshing(false);
+            setSwipeRefreshing(false);
             Log.d(LOG_TAG, "No internet available");
             return;
         }
@@ -101,6 +103,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         return activeNetworkInfo != null;
     }
 
+    private static void setSwipeRefreshing(final boolean refresh)
+    {
+        if(sSwipeContainer != null)
+        {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    sSwipeContainer.setRefreshing(refresh);
+                }
+            });
+        }
+    }
+
     @Override
     public void onPerformSync(Account account, Bundle bundle, String s, ContentProviderClient contentProviderClient, SyncResult syncResult)
     {
@@ -143,10 +161,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         }
         finally
         {
-            if (sSwipeContainer != null)
-            {
-                sSwipeContainer.setRefreshing(false);
-            }
+           setSwipeRefreshing(false);
         }
     }
 
