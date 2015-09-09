@@ -228,6 +228,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
                 getString(R.string.edit),
                 getString(R.string.share),
                 getString(R.string.add_tag),
+                getString(R.string.move_to),
                 getString(R.string.delete)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -246,12 +247,42 @@ public class NotesFragment extends Fragment implements AsyncCallback
                     case 2: // add a tag
                         // TODO implement add tags
                         break;
-                    case 3: // delete note
+                    case 3: // Move To
+                        showMoveNoteDialog(note);
+                        break;
+                    case 4: // delete note
                         showDeleteNoteDialog(note);
                         break;
                 }
             }
         });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showMoveNoteDialog(final Note note)
+    {
+        NoteDataSource noteDataSource = NoteDataSource.getInstance(getActivity());
+        final List<Notebook> allNotebooks = noteDataSource.getAllNotebooks();
+        CharSequence[] notebookChars = new CharSequence[allNotebooks.size()];
+
+        for (int i = 0; i < allNotebooks.size(); i++)
+        {
+            notebookChars[i] = allNotebooks.get(i).getTitle();
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(getString(R.string.move_to)).setIcon(R.mipmap.ic_notebook_grey)/*.setMessage(R.string.move_to_message)*/
+                .setItems(notebookChars, new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        //createNewNote(allNotebooks.get(which));
+                        note.setNotebookId(allNotebooks.get(which).getId());
+                        NoteDataSource.getInstance(getActivity()).updateNote(note);
+                        SyncAdapter.syncImmediately(getActivity());
+                    }
+                });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
