@@ -123,7 +123,7 @@ public class NoteSync
     /**
      * Updates a note on the server
      */
-    private static void updateNote(String host, String hash, NotesAdapter.Note note) throws IOException, JSONException, AuthenticatorException
+    private static boolean updateNote(String host, String hash, NotesAdapter.Note note) throws IOException, JSONException, AuthenticatorException
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -180,7 +180,11 @@ public class NoteSync
             {
                 JSONObject json = new JSONObject(jsonStr);
 
-                if (!json.getBoolean("success"))
+                if (json.getBoolean("success"))
+                {
+                    return true;
+                }
+                else
                 {
                     throw new ConnectException();
                 }
@@ -400,9 +404,15 @@ public class NoteSync
     {
         for (NotesAdapter.Note localNote : updatedNotes)
         {
-            updateNote(host, hash, localNote);
-            localNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
-            NoteDataSource.getInstance(context).updateNote(localNote);
+            if (updateNote(host, hash, localNote))
+            {
+                localNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
+                NoteDataSource.getInstance(context).updateNote(localNote);
+            }
+            else
+            {
+                Log.d(LOG_TAG, "Updating note failed");
+            }
         }
     }
 
@@ -411,6 +421,7 @@ public class NoteSync
      *
      * @param movedNotes Notes that should be moved to a different notebook on the server
      */
+
     public static void moveNotes(Context context, String host, String hash, List<NotesAdapter.Note> movedNotes) throws IOException, JSONException, AuthenticatorException
     {
         for (NotesAdapter.Note localNote : movedNotes)
