@@ -10,15 +10,15 @@ import android.support.annotation.NonNull;
 
 public class NoteContentProvider extends ContentProvider
 {
-    public static final int NOTES = 100;
-    public static final int NOTES_FROM_NOTEBOOK = 101;
-    public static final int NOTES_WITH_TAG = 102;
-    public static final int NOTEBOOKS = 200;
-    public static final int TAGS = 300;
+    private static final int NOTES = 100;
+    private static final int NOTES_FROM_NOTEBOOK = 101;
+    private static final int NOTES_WITH_TAG = 102;
+    private static final int NOTEBOOKS = 200;
+    private static final int TAGS = 300;
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private DatabaseHelper mOpenHelper;
 
-    static UriMatcher buildUriMatcher()
+    private static UriMatcher buildUriMatcher()
     {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = DatabaseContract.CONTENT_AUTHORITY;

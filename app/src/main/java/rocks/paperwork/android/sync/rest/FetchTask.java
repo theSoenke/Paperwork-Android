@@ -3,8 +3,6 @@ package rocks.paperwork.android.sync.rest;
 import android.accounts.AuthenticatorException;
 import android.util.Log;
 
-import org.json.JSONException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +18,7 @@ public class FetchTask
 {
     private static final String LOG_TAG = FetchTask.class.getSimpleName();
 
-    public static String fetchData(String path, String hash) throws IOException, JSONException, AuthenticatorException
+    public static String fetchData(String path, String hash) throws IOException, AuthenticatorException
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;

@@ -450,7 +450,7 @@ public class NoteSync
         }
     }
 
-    public static Note parseNote(String jsonStr) throws JSONException
+    private static Note parseNote(String jsonStr) throws JSONException
     {
         JSONObject jsonNote = new JSONObject(jsonStr);
         JSONObject version = jsonNote.getJSONObject("version");

@@ -1,6 +1,5 @@
 package rocks.paperwork.android.sync;
 
-import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.Map;
 
 import rocks.paperwork.android.adapters.NotesAdapter.Note;
 import rocks.paperwork.android.data.DatabaseContract;
-import rocks.paperwork.android.data.NoteDataSource;
 
 /**
  * Syncs local and remote version of objects
@@ -18,12 +16,6 @@ import rocks.paperwork.android.data.NoteDataSource;
 public class SyncManager
 {
     private final String LOG_TAG = SyncManager.class.getSimpleName();
-    private final Context mContext;
-
-    public SyncManager(Context context)
-    {
-        mContext = context;
-    }
 
     /**
      * Syncs local and remote notes. Upload new local notes first to the server before calling this method
@@ -70,7 +62,7 @@ public class SyncManager
                         // local note is newer
                         noteUpdatesForServer.add(localNote);
 
-                        if(!localNote.getNotebookId().equals(remoteNote.getNotebookId()))
+                        if (!localNote.getNotebookId().equals(remoteNote.getNotebookId()))
                         {
                             localMovedNotes.add(localNote);
                         }
