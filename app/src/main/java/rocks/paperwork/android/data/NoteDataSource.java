@@ -209,6 +209,7 @@ public class NoteDataSource
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.NotebookEntry._ID, notebook.getId());
         values.put(DatabaseContract.NotebookEntry.COLUMN_TITLE, notebook.getTitle());
+        values.put(DatabaseContract.NotebookEntry.COLUMN_SYNC_STATUS, notebook.getSyncStatus().ordinal());
 
         mContext.getContentResolver().insert(DatabaseContract.NotebookEntry.CONTENT_URI, values);
     }

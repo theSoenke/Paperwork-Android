@@ -49,10 +49,19 @@ public class DatabaseContract
 
         public static final String TABLE_NAME = "notebook";
         public static final String COLUMN_TITLE = "title";
+        public static final String COLUMN_SYNC_STATUS = "sync_status";
 
         public static Uri buildNotebookUri(long id)
         {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public enum NOTEBOOK_STATUS
+        {
+            not_synced,
+            edited,
+            synced,
+            deleted
         }
     }
 

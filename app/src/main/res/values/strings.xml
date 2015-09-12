@@ -37,6 +37,7 @@
     <string name="move_to_message">Choose the new notebook for this note</string>
     <string name="delete">Delete</string>
     <string name="delete_note_message">Are you sure that you want to delete this note?</string>
+    <string name="create_notebook_title">Create Notebook</string>
 
     <!-- Strings related to login -->
     <string name="title_activity_login">Sign in</string>
