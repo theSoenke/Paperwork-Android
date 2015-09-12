@@ -177,8 +177,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             List<Note> localNotes = dataSource.getNotes(null);
 
             SyncManager.NotesToSync notesToSync = syncManager.syncNotes(localNotes, remoteNotes);
-            dataSource.bulkInsertNotes(notesToSync.remoteNewNotes);
+
+            // update server
             NoteSync.updateNotes(getContext(), host, hash, notesToSync.locallyUpdatedNotes);
+            NoteSync.moveNotes(getContext(), host, hash, notesToSync.localMovedNotes);
+
+            // update local database
+            dataSource.bulkInsertNotes(notesToSync.remoteNewNotes);
 
             for (Note note : notesToSync.remoteUpdatedNotes)
             {
@@ -189,6 +194,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             {
                 dataSource.deleteNote(note);
             }
+
         }
         else if (data == NoteData.notebooks)
         {

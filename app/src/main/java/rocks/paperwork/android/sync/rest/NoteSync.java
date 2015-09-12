@@ -207,6 +207,83 @@ public class NoteSync
         }
     }
 
+    /**
+     * Moves a note on the server to a different notebook
+     */
+    private static void moveNote(String host, String hash, NotesAdapter.Note note) throws IOException, JSONException, AuthenticatorException
+    {
+        HttpURLConnection urlConnection = null;
+        BufferedReader reader = null;
+        String jsonStr;
+        String path = host + "/api/v1/notebooks/" + note.getOldNotebookId() + "/notes/" + note.getId() + "/move/" + note.getNotebookId();
+
+        try
+        {
+            URL url = new URL(path);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            urlConnection.setRequestProperty("Accept", "application/json");
+            urlConnection.setRequestProperty("Authorization", "Basic " + hash);
+            urlConnection.setConnectTimeout(10000);
+            urlConnection.setReadTimeout(15000);
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            // read response
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuilder builder = new StringBuilder();
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                builder.append(line).append("\n");
+            }
+            jsonStr = builder.toString();
+
+
+            int responseCode = urlConnection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED)
+            {
+                throw new AuthenticatorException("Authentication failed");
+            }
+            else if (responseCode != HttpURLConnection.HTTP_OK)
+            {
+                Log.d(LOG_TAG, "Error while creating note, response code: " + urlConnection.getResponseCode());
+                throw new ConnectException();
+            }
+            else
+            {
+                JSONObject json = new JSONObject(jsonStr);
+
+                if (!json.getBoolean("success"))
+                {
+                    throw new ConnectException();
+                }
+            }
+        }
+        finally
+        {
+            if (urlConnection != null)
+            {
+                urlConnection.disconnect();
+            }
+
+            if (reader != null)
+            {
+                try
+                {
+                    reader.close();
+                }
+                catch (final IOException e)
+                {
+                    Log.e(LOG_TAG, "Error closing stream", e);
+                }
+            }
+        }
+    }
+
     private static void deleteNote(String host, String hash, NotesAdapter.Note note) throws IOException, JSONException, AuthenticatorException
     {
         HttpURLConnection urlConnection = null;
@@ -324,6 +401,21 @@ public class NoteSync
         for (NotesAdapter.Note localNote : updatedNotes)
         {
             updateNote(host, hash, localNote);
+            localNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
+            NoteDataSource.getInstance(context).updateNote(localNote);
+        }
+    }
+
+    /**
+     * Updates notes on the server
+     *
+     * @param movedNotes Notes that should be moved to a different notebook on the server
+     */
+    public static void moveNotes(Context context, String host, String hash, List<NotesAdapter.Note> movedNotes) throws IOException, JSONException, AuthenticatorException
+    {
+        for (NotesAdapter.Note localNote : movedNotes)
+        {
+            moveNote(host, hash, localNote);
             localNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
             NoteDataSource.getInstance(context).updateNote(localNote);
         }

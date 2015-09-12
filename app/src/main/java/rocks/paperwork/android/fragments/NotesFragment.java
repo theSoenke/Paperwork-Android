@@ -278,6 +278,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
                     public void onClick(DialogInterface dialog, int which)
                     {
                         note.setNotebookId(allNotebooks.get(which).getId());
+                        note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
                         NoteDataSource.getInstance(getActivity()).updateNote(note);
                         SyncAdapter.syncImmediately(getActivity());
                     }

@@ -40,9 +40,8 @@ public class SyncManager
         List<Note> noteUpdatesForServer = new ArrayList<>();
         List<Note> newRemoteNotes = new ArrayList<>();
         List<Note> localNotesToDelete = new ArrayList<>();
-        List<Note> notesMovedLocally = new ArrayList<>();
+        List<Note> localMovedNotes = new ArrayList<>();
 
-        NoteDataSource dataSource = NoteDataSource.getInstance(mContext);
 
         for (Note localNote : localNotes)
         {
@@ -61,8 +60,7 @@ public class SyncManager
             // check whether local note is uploaded to the server and
             if (remoteNoteIds.containsKey(key))
             {
-                // note is uploaded to the server, get notes which need to synced
-
+                // note exists on the server, get notes which need to synced
                 Note remoteNote = remoteNoteIds.get(key);
 
                 if (localNote.getSyncStatus() == DatabaseContract.NoteEntry.NOTE_STATUS.edited)
@@ -71,7 +69,11 @@ public class SyncManager
                     {
                         // local note is newer
                         noteUpdatesForServer.add(localNote);
-                        remoteNoteIds.remove(key);
+
+                        if(!localNote.getNotebookId().equals(remoteNote.getNotebookId()))
+                        {
+                            localMovedNotes.add(localNote);
+                        }
                     }
                 }
                 else if (localNote.getUpdatedAt().before(remoteNote.getUpdatedAt()))
@@ -80,7 +82,6 @@ public class SyncManager
                     if (localNote.getSyncStatus() == DatabaseContract.NoteEntry.NOTE_STATUS.synced)
                     {
                         updatedOnServer.add(remoteNote);
-                        remoteNoteIds.remove(key);
                     }
                     else if (localNote.getSyncStatus() == DatabaseContract.NoteEntry.NOTE_STATUS.edited)
                     {
@@ -90,10 +91,12 @@ public class SyncManager
                         updatedOnServer.add(remoteNote);
                     }
                 }
+
+                remoteNoteIds.remove(key);
             }
             else
             {
-                // note is not availableon server anmore and needs to e deleted
+                // note is not available on server anymore and needs to be deleted
                 localNotesToDelete.add(localNote);
             }
         }
@@ -102,20 +105,18 @@ public class SyncManager
         {
             Note remoteNote = remoteNoteIds.get(key);
 
-            Log.e(LOG_TAG, remoteNote.getTitle());
-
-            if (!localNoteIds.containsKey(key))
+            if (localNoteIds.containsKey(key))
+            {
+                Log.e(LOG_TAG, "Key should be already removed");
+            }
+            else
             {
                 // note only exists on server
                 newRemoteNotes.add(remoteNote);
             }
-            else
-            {
-                Log.e(LOG_TAG, "Key should be already removed");
-            }
         }
 
-        return new NotesToSync(noteUpdatesForServer, updatedOnServer, newRemoteNotes, localNotesToDelete);
+        return new NotesToSync(noteUpdatesForServer, updatedOnServer, newRemoteNotes, localNotesToDelete, localMovedNotes);
     }
 
     public class NotesToSync
@@ -124,16 +125,19 @@ public class SyncManager
         public final List<Note> remoteUpdatedNotes;
         public final List<Note> remoteNewNotes;
         public final List<Note> localNotesToDelete;
+        public final List<Note> localMovedNotes;
 
         public NotesToSync(List<Note> locallyUpdatedNotes,
                            List<Note> remoteUpdatedNotes,
                            List<Note> remoteNewNotes,
-                           List<Note> localNotesToDelete)
+                           List<Note> localNotesToDelete,
+                           List<Note> localMovedNotes)
         {
             this.locallyUpdatedNotes = locallyUpdatedNotes;
             this.remoteUpdatedNotes = remoteUpdatedNotes;
             this.remoteNewNotes = remoteNewNotes;
             this.localNotesToDelete = localNotesToDelete;
+            this.localMovedNotes = localMovedNotes;
         }
     }
 }
