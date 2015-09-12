@@ -67,6 +67,7 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         private String mTitle;
         private String mContent;
         private String mNotebookId;
+        private String mOldNotebookId;
         private Date mUpdatedAt;
         private DatabaseContract.NoteEntry.NOTE_STATUS mSyncStatus;
 
@@ -125,6 +126,10 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
 
         public void setNotebookId(String id)
         {
+            if(mNotebookId != null)
+            {
+                mOldNotebookId = mNotebookId;
+            }
             mNotebookId = id;
         }
 
@@ -146,6 +151,11 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         public void setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS status)
         {
             mSyncStatus = status;
+        }
+
+        public String getOldNotebookId()
+        {
+            return mOldNotebookId;
         }
     }
 }
