@@ -14,6 +14,7 @@ import java.util.List;
 
 import rocks.paperwork.android.R;
 import rocks.paperwork.android.adapters.NotebookAdapter.Notebook;
+import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.NoteDataSource;
 
 public class NotebookAdapter extends ArrayAdapter<Notebook>
@@ -62,6 +63,7 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         private final String mId;
         private String mTitle;
         private Date mUpdatedAt;
+        private DatabaseContract.NotebookEntry.NOTEBOOK_STATUS mSyncStatus;
 
         public Notebook(String id)
         {
@@ -91,6 +93,16 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
         public void setUpdatedAt(Date date)
         {
             mUpdatedAt = date;
+        }
+
+        public void setSyncStatus(DatabaseContract.NotebookEntry.NOTEBOOK_STATUS status)
+        {
+            mSyncStatus = status;
+        }
+
+        public DatabaseContract.NotebookEntry.NOTEBOOK_STATUS getSyncStatus()
+        {
+            return mSyncStatus;
         }
 
     }

@@ -19,7 +19,7 @@ import rocks.paperwork.android.data.DatabaseContract.TagEntry;
 public class DatabaseHelper extends SQLiteOpenHelper
 {
     private static final String DATABASE_NAME = "notes.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static final String LOG_TAG = DatabaseHelper.class.getName();
 
     public DatabaseHelper(Context context)
@@ -66,7 +66,8 @@ public class DatabaseHelper extends SQLiteOpenHelper
     {
         final String SQL_CREATE_NOTEBOOK_TABLE = "CREATE TABLE " + NotebookEntry.TABLE_NAME +
                 " (" + NotebookEntry._ID + " TEXT PRIMARY KEY NOT NULL," +
-                NotebookEntry.COLUMN_TITLE + " TEXT NOT NULL " +
+                NotebookEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
+                NotebookEntry.COLUMN_SYNC_STATUS + " INTEGER NOT NULL DEFAULT 0 " +
                 " );";
 
         final String SQL_CREATE_NOTE_TABLE = "CREATE TABLE " + NoteEntry.TABLE_NAME +

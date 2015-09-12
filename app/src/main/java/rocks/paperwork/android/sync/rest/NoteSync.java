@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import rocks.paperwork.android.adapters.NotesAdapter;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.DatabaseHelper;
 import rocks.paperwork.android.data.NoteDataSource;
+import rocks.paperwork.android.adapters.NotesAdapter.Note;
 
 /**
  * Syncs notes with the server and parses note json
@@ -32,7 +32,10 @@ public class NoteSync
 {
     private static final String LOG_TAG = NoteSync.class.getSimpleName();
 
-    private static NotesAdapter.Note createNote(String host, String hash, NotesAdapter.Note note) throws IOException, JSONException, AuthenticatorException
+    /**
+     * Creates a new note on the server
+     */
+    private static Note createNote(String host, String hash, Note note) throws IOException, JSONException, AuthenticatorException
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -123,7 +126,7 @@ public class NoteSync
     /**
      * Updates a note on the server
      */
-    private static boolean updateNote(String host, String hash, NotesAdapter.Note note) throws IOException, JSONException, AuthenticatorException
+    private static boolean updateNote(String host, String hash, Note note) throws IOException, JSONException, AuthenticatorException
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -214,7 +217,7 @@ public class NoteSync
     /**
      * Moves a note on the server to a different notebook
      */
-    private static void moveNote(String host, String hash, NotesAdapter.Note note) throws IOException, JSONException, AuthenticatorException
+    private static void moveNote(String host, String hash, Note note) throws IOException, JSONException, AuthenticatorException
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -288,7 +291,7 @@ public class NoteSync
         }
     }
 
-    private static void deleteNote(String host, String hash, NotesAdapter.Note note) throws IOException, JSONException, AuthenticatorException
+    private static void deleteNote(String host, String hash, Note note) throws IOException, JSONException, AuthenticatorException
     {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -378,11 +381,11 @@ public class NoteSync
     public static void uploadNotes(Context context, String host, String hash) throws IOException, JSONException, AuthenticatorException
     {
         NoteDataSource dataSource = NoteDataSource.getInstance(context);
-        List<NotesAdapter.Note> notSyncedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
+        List<Note> notSyncedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.not_synced);
 
-        for (NotesAdapter.Note note : notSyncedNotes)
+        for (Note note : notSyncedNotes)
         {
-            NotesAdapter.Note newNote = createNote(host, hash, note);
+            Note newNote = createNote(host, hash, note);
             if (newNote != null)
             {
                 dataSource.deleteNote(note);
@@ -400,9 +403,9 @@ public class NoteSync
      *
      * @param updatedNotes Notes that should be updated on the server
      */
-    public static void updateNotes(Context context, String host, String hash, List<NotesAdapter.Note> updatedNotes) throws IOException, JSONException, AuthenticatorException
+    public static void updateNotes(Context context, String host, String hash, List<Note> updatedNotes) throws IOException, JSONException, AuthenticatorException
     {
-        for (NotesAdapter.Note localNote : updatedNotes)
+        for (Note localNote : updatedNotes)
         {
             if (updateNote(host, hash, localNote))
             {
@@ -422,9 +425,9 @@ public class NoteSync
      * @param movedNotes Notes that should be moved to a different notebook on the server
      */
 
-    public static void moveNotes(Context context, String host, String hash, List<NotesAdapter.Note> movedNotes) throws IOException, JSONException, AuthenticatorException
+    public static void moveNotes(Context context, String host, String hash, List<Note> movedNotes) throws IOException, JSONException, AuthenticatorException
     {
-        for (NotesAdapter.Note localNote : movedNotes)
+        for (Note localNote : movedNotes)
         {
             moveNote(host, hash, localNote);
             localNote.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
@@ -438,16 +441,16 @@ public class NoteSync
     public static void deleteNotes(Context context, String host, String hash) throws IOException, JSONException, AuthenticatorException
     {
         NoteDataSource dataSource = NoteDataSource.getInstance(context);
-        List<NotesAdapter.Note> deletedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
+        List<Note> deletedNotes = dataSource.getNotes(DatabaseContract.NoteEntry.NOTE_STATUS.deleted);
 
-        for (NotesAdapter.Note note : deletedNotes)
+        for (Note note : deletedNotes)
         {
             deleteNote(host, hash, note);
             dataSource.deleteNote(note);
         }
     }
 
-    public static NotesAdapter.Note parseNote(String jsonStr) throws JSONException
+    public static Note parseNote(String jsonStr) throws JSONException
     {
         JSONObject jsonNote = new JSONObject(jsonStr);
         JSONObject version = jsonNote.getJSONObject("version");
@@ -458,7 +461,7 @@ public class NoteSync
         Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
         String notebookId = jsonNote.getString("notebook_id");
 
-        NotesAdapter.Note note = new NotesAdapter.Note(id);
+        Note note = new Note(id);
         note.setNotebookId(notebookId);
         note.setTitle(title);
         note.setContent(content);
@@ -468,9 +471,9 @@ public class NoteSync
         return note;
     }
 
-    public static List<NotesAdapter.Note> parseNotes(String jsonStr) throws JSONException
+    public static List<Note> parseNotes(String jsonStr) throws JSONException
     {
-        List<NotesAdapter.Note> notes = new ArrayList<>();
+        List<Note> notes = new ArrayList<>();
 
         JSONObject jsonData;
         jsonData = new JSONObject(jsonStr);
@@ -480,7 +483,7 @@ public class NoteSync
         for (int i = 0; i < jsonNotes.length(); i++)
         {
             JSONObject jsonNote = jsonNotes.getJSONObject(i);
-            NotesAdapter.Note note = parseNote(jsonNote.toString());
+            Note note = parseNote(jsonNote.toString());
 
             notes.add(note);
         }
