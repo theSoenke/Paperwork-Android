@@ -71,7 +71,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
     }
 
     // TODO use paperwork account instead of fake account
-    public static Account getSyncAccount(Context context)
+    private static Account getSyncAccount(Context context)
     {
         // Get an instance of the Android account manager
         AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
@@ -105,7 +105,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 
     private static void setSwipeRefreshing(final boolean refresh)
     {
-        if(sSwipeContainer != null)
+        if (sSwipeContainer != null)
         {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable()
@@ -161,14 +161,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         }
         finally
         {
-           setSwipeRefreshing(false);
+            setSwipeRefreshing(false);
         }
     }
 
     private void fetch(String host, String hash, NoteData data) throws IOException, JSONException, AuthenticatorException
     {
         NoteDataSource dataSource = NoteDataSource.getInstance(getContext());
-        SyncManager syncManager = new SyncManager(getContext());
+        SyncManager syncManager = new SyncManager();
 
         if (data == NoteData.notes)
         {
@@ -190,7 +190,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
                 dataSource.updateNote(note);
             }
 
-            for(Note note: notesToSync.localNotesToDelete)
+            for (Note note : notesToSync.localNotesToDelete)
             {
                 dataSource.deleteNote(note);
             }

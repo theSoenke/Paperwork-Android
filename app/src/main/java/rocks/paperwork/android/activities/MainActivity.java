@@ -13,7 +13,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -41,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar mToolbar;
     private int mCurrentSelectedPosition;
     private boolean mUserLearnedDrawer;
-    private NavigationView mNavigationView;
     private SubMenu mTagMenu;
 
     public static MainActivity getInstance()
@@ -80,9 +78,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.nav_drawer);
-        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
         mUserLearnedDrawer = Boolean.valueOf(HostPreferences.readSharedSetting(this, HostPreferences.PREF_USER_LEARNED_DRAWER, "false"));
-        mNavigationView.setNavigationItemSelectedListener(this);
+        navigationView.setNavigationItemSelectedListener(this);
 
         String email = HostPreferences.readSharedSetting(this, "email", "");
         TextView userEmail = (TextView) findViewById(R.id.user_email);
@@ -96,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         }
 
-        Menu menu = mNavigationView.getMenu();
+        Menu menu = navigationView.getMenu();
         menu.getItem(mCurrentSelectedPosition).setChecked(true);
         onNavigationItemSelected(menu.getItem(mCurrentSelectedPosition));
 

@@ -66,7 +66,7 @@ public class NotebooksFragment extends Fragment implements AsyncCallback
             @Override
             public void onClick(View v)
             {
-                    showNotebookCreateDialog();
+                showNotebookCreateDialog();
             }
         });
 

@@ -358,17 +358,17 @@ public class NoteDataSource
                 null);
     }
 
-    public void deleteAllNotes()
+    private void deleteAllNotes()
     {
         mContext.getContentResolver().delete(DatabaseContract.NoteEntry.CONTENT_URI, null, null);
     }
 
-    public void deleteAllNotebooks()
+    private void deleteAllNotebooks()
     {
         mContext.getContentResolver().delete(DatabaseContract.NotebookEntry.CONTENT_URI, null, null);
     }
 
-    public void deleteAllTags()
+    private void deleteAllTags()
     {
         mContext.getContentResolver().delete(DatabaseContract.TagEntry.CONTENT_URI, null, null);
     }

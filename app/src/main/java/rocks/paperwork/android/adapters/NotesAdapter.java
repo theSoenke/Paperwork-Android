@@ -126,7 +126,7 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
 
         public void setNotebookId(String id)
         {
-            if(mNotebookId != null)
+            if (mNotebookId != null)
             {
                 mOldNotebookId = mNotebookId;
             }
