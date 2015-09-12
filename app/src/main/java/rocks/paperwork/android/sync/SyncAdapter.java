@@ -147,12 +147,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         }
         catch (AuthenticatorException e)
         {
-            Log.d(LOG_TAG, "Authentication failed");
             authenticationFailed();
         }
         catch (FileNotFoundException e)
         {
             // FIXME workaround because response code is always 200, even if authentication failed
+            Log.e(LOG_TAG, "FileNotFoundException", e);
             authenticationFailed();
         }
         catch (IOException e)

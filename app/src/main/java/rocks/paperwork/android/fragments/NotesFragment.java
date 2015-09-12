@@ -26,6 +26,7 @@ import rocks.paperwork.android.adapters.NotebookAdapter.Notebook;
 import rocks.paperwork.android.adapters.NotesAdapter;
 import rocks.paperwork.android.adapters.NotesAdapter.Note;
 import rocks.paperwork.android.data.DatabaseContract;
+import rocks.paperwork.android.data.DatabaseHelper;
 import rocks.paperwork.android.data.NoteDataSource;
 import rocks.paperwork.android.interfaces.AsyncCallback;
 import rocks.paperwork.android.sync.SyncAdapter;
@@ -279,6 +280,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
                     {
                         note.setNotebookId(allNotebooks.get(which).getId());
                         note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
+                        note.setUpdatedAt(DatabaseHelper.getCurrentTime());
                         NoteDataSource.getInstance(getActivity()).updateNote(note);
                         SyncAdapter.syncImmediately(getActivity());
                     }
