@@ -184,6 +184,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             {
                 dataSource.updateNote(note);
             }
+
+            for(Note note: notesToSync.localNotesToDelete)
+            {
+                dataSource.deleteNote(note);
+            }
         }
         else if (data == NoteData.notebooks)
         {
