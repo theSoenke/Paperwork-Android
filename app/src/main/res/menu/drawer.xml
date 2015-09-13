@@ -11,32 +11,4 @@
             android:icon="@mipmap/ic_notebook_grey"
             android:title="@string/notebooks"/>
     </group>
-
-    <item
-        android:id="@+id/tags"
-        android:title="Tags">
-
-        <menu>
-            <item
-                android:icon="@mipmap/ic_tags_grey"
-                android:title="tag1"/>
-            <item
-                android:icon="@mipmap/ic_tags_grey"
-                android:title="tag2"/>
-        </menu>
-    </item>
-
-    <item android:title="@string/more">
-        <menu>
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@mipmap/ic_settings_grey"
-                android:title="@string/settings"/>
-            <item
-                android:id="@+id/nav_about"
-                android:icon="@mipmap/ic_about_grey"
-                android:title="@string/about"/>
-        </menu>
-    </item>
-
 </menu>

@@ -66,7 +66,8 @@ public class NotebooksFragment extends Fragment implements AsyncCallback
             @Override
             public void onClick(View v)
             {
-                showNotebookCreateDialog();
+                // TODO enable creating notebooks when sync works
+                //showNotebookCreateDialog();
             }
         });
 

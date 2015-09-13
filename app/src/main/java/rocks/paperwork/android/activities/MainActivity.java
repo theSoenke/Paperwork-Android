@@ -17,6 +17,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.widget.BaseAdapter;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int mCurrentSelectedPosition;
     private boolean mUserLearnedDrawer;
     private SubMenu mTagMenu;
+    private NavigationView mNavigationView;
 
     public static MainActivity getInstance()
     {
@@ -78,9 +82,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.nav_drawer);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mUserLearnedDrawer = Boolean.valueOf(HostPreferences.readSharedSetting(this, HostPreferences.PREF_USER_LEARNED_DRAWER, "false"));
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
         String email = HostPreferences.readSharedSetting(this, "email", "");
         TextView userEmail = (TextView) findViewById(R.id.user_email);
@@ -94,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         }
 
-        Menu menu = navigationView.getMenu();
+        Menu menu = mNavigationView.getMenu();
         menu.getItem(mCurrentSelectedPosition).setChecked(true);
         onNavigationItemSelected(menu.getItem(mCurrentSelectedPosition));
 
@@ -229,10 +233,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 (fm.beginTransaction().replace(R.id.main_container, fragment)).commit();
                 mCurrentSelectedPosition = 1;
                 break;
-            case R.id.nav_settings:
-                break;
-            case R.id.nav_about:
-                break;
             default:
                 return true;
         }
@@ -252,7 +252,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         for (Tag tag : tags)
         {
-            mTagMenu.add(tag.getTitle());
+            mTagMenu.add(tag.getTitle()).setIcon(R.mipmap.ic_tags_grey);
+        }
+
+        // workaround for bug in navgationview where it's not refreshed after a new item is added
+        // https://code.google.com/p/android/issues/detail?id=176300
+        for (int i = 0, count = mNavigationView.getChildCount(); i < count; i++)
+        {
+            final View child = mNavigationView.getChildAt(i);
+            if (child != null && child instanceof ListView)
+            {
+                final ListView menuView = (ListView) child;
+                final HeaderViewListAdapter adapter = (HeaderViewListAdapter) menuView.getAdapter();
+                final BaseAdapter wrapped = (BaseAdapter) adapter.getWrappedAdapter();
+                wrapped.notifyDataSetChanged();
+            }
         }
     }
 }
