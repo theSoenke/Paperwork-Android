@@ -16,6 +16,7 @@ public class DatabaseContract
     public static final String PATH_NOTES = "notes";
     public static final String PATH_NOTEBOOKS = "notebooks";
     public static final String PATH_TAGS = "tags";
+    public static final String PATH_NOTE_TAGS = "tagged_notes";
 
     public static class NoteEntry implements BaseColumns
     {
@@ -72,6 +73,21 @@ public class DatabaseContract
 
         public static final String TABLE_NAME = "tag";
         public static final String COLUMN_TITLE = "title";
+
+        public static Uri buildTagUri(long id)
+        {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+    }
+
+    public static final class NoteTagsEntry implements BaseColumns
+    {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_NOTE_TAGS).build();
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_NOTE_TAGS;
+
+        public static final String TABLE_NAME = "note_tags";
+        public static final String COLUMN_NOTE_ID = "note_id";
+        public static final String COLUMN_TAG_ID = "tag_id";
 
         public static Uri buildTagUri(long id)
         {

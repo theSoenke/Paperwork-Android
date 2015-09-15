@@ -133,6 +133,47 @@ public class NoteDataSource
         return notes;
     }
 
+    public List<Note> getNotesWithTag(Tag tag)
+    {
+        List<Note> notes = new ArrayList<>();
+
+        String[] selectionArgs = new String[]{tag.getId()};
+
+        Cursor cursor = mContext.getContentResolver().query(
+                DatabaseContract.NoteTagsEntry.CONTENT_URI,
+                null,
+                null,
+                selectionArgs,
+                null);
+
+        try
+        {
+            int uuidColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry._ID);
+            int titleColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_TITLE);
+            int contentColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_CONTENT);
+            int updatedAtColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_UPDATED_AT);
+            int syncColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_SYNC_STATUS);
+            int notebookColumn = cursor.getColumnIndex(DatabaseContract.NoteEntry.COLUMN_NOTEBOOK_KEY);
+
+            while (cursor.moveToNext())
+            {
+                Note note = new Note(cursor.getString(uuidColumn));
+                note.setTitle(cursor.getString(titleColumn));
+                note.setContent(cursor.getString(contentColumn));
+                Date date = DatabaseHelper.getDateTime(cursor.getString(updatedAtColumn));
+                note.setUpdatedAt(date);
+                note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.values()[cursor.getInt(syncColumn)]);
+                note.setNotebookId(cursor.getString(notebookColumn));
+                notes.add(note);
+            }
+        }
+        finally
+        {
+            cursor.close();
+        }
+        return notes;
+    }
+
     public List<Note> getAllNotesFromNotebook(Notebook notebook)
     {
         List<Note> notes = new ArrayList<>();
@@ -282,6 +323,16 @@ public class NoteDataSource
         mContext.getContentResolver().bulkInsert(DatabaseContract.NoteEntry.CONTENT_URI, contentValues);
     }
 
+    public void insertTaggedNote(Tag tag, Note note)
+    {
+        ContentValues values = new ContentValues();
+
+        values.put(DatabaseContract.NoteTagsEntry.COLUMN_NOTE_ID, note.getId());
+        values.put(DatabaseContract.NoteTagsEntry.COLUMN_TAG_ID, tag.getId());
+
+        mContext.getContentResolver().insert(DatabaseContract.NoteTagsEntry.CONTENT_URI, values);
+    }
+
     public List<Note> searchNotes(String query)
     {
         // TODO use FTS for search
@@ -354,6 +405,15 @@ public class NoteDataSource
         String whereClause = DatabaseContract.NoteEntry._ID + " = '" + note.getId() + "'";
         mContext.getContentResolver().delete(
                 DatabaseContract.NoteEntry.CONTENT_URI,
+                whereClause,
+                null);
+    }
+
+    public void deleteTagsOfNote(Note note)
+    {
+        String whereClause = DatabaseContract.NoteTagsEntry.COLUMN_NOTE_ID + " = '" + note.getId() + "'";
+
+        mContext.getContentResolver().delete(DatabaseContract.NoteTagsEntry.CONTENT_URI,
                 whereClause,
                 null);
     }

@@ -1,6 +1,8 @@
 package rocks.paperwork.android.adapters;
 
-public class Tag
+import java.io.Serializable;
+
+public class Tag implements Serializable
 {
     private final String mId;
     private String mTitle;

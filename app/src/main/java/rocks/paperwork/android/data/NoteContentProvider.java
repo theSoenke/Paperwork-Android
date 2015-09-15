@@ -5,18 +5,39 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
 public class NoteContentProvider extends ContentProvider
 {
     private static final int NOTES = 100;
-    private static final int NOTES_FROM_NOTEBOOK = 101;
-    private static final int NOTES_WITH_TAG = 102;
     private static final int NOTEBOOKS = 200;
     private static final int TAGS = 300;
+    private static final int NOTE_TAGS = 400;
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private DatabaseHelper mOpenHelper;
+
+    private static final SQLiteQueryBuilder sNotesByTagQueryBuilder;
+
+    static
+    {
+        sNotesByTagQueryBuilder = new SQLiteQueryBuilder();
+        sNotesByTagQueryBuilder.setTables(DatabaseContract.NoteEntry.TABLE_NAME + " INNER JOIN " +
+                DatabaseContract.NoteTagsEntry.TABLE_NAME +
+                " ON " + DatabaseContract.NoteTagsEntry.TABLE_NAME +
+                "." + DatabaseContract.NoteTagsEntry.COLUMN_NOTE_ID +
+                " = " + DatabaseContract.NoteEntry.TABLE_NAME +
+                "." + DatabaseContract.NoteEntry._ID);
+    }
+
+    private static final String sNotesByTagSelection =
+            DatabaseContract.NoteTagsEntry.TABLE_NAME +
+                    "." + DatabaseContract.NoteTagsEntry.COLUMN_TAG_ID + " = ?";
+
+    private static final String sTagsByNoteSelection =
+            DatabaseContract.NoteEntry.TABLE_NAME +
+                    "." + DatabaseContract.NoteEntry._ID + " = ? ";
 
     private static UriMatcher buildUriMatcher()
     {
@@ -24,10 +45,9 @@ public class NoteContentProvider extends ContentProvider
         final String authority = DatabaseContract.CONTENT_AUTHORITY;
 
         matcher.addURI(authority, DatabaseContract.PATH_NOTES, NOTES);
-        matcher.addURI(authority, DatabaseContract.PATH_NOTES + "/*", NOTES_FROM_NOTEBOOK);
-        matcher.addURI(authority, DatabaseContract.PATH_NOTES + "/*", NOTES_WITH_TAG);
         matcher.addURI(authority, DatabaseContract.PATH_NOTEBOOKS, NOTEBOOKS);
         matcher.addURI(authority, DatabaseContract.PATH_TAGS, TAGS);
+        matcher.addURI(authority, DatabaseContract.PATH_NOTE_TAGS, NOTE_TAGS);
 
         return matcher;
     }
@@ -57,32 +77,20 @@ public class NoteContentProvider extends ContentProvider
                         null,
                         sortOrder
                 );
+
                 break;
             }
-            case NOTES_FROM_NOTEBOOK:
+            case NOTE_TAGS:
             {
-                cursor = mOpenHelper.getReadableDatabase().query(
-                        DatabaseContract.NoteEntry.TABLE_NAME,
+                cursor = sNotesByTagQueryBuilder.query(
+                        mOpenHelper.getReadableDatabase(),
                         projection,
-                        selection,
+                        sNotesByTagSelection,
                         selectionArgs,
                         null,
                         null,
-                        sortOrder
-                );
-                break;
-            }
-            case NOTES_WITH_TAG:
-            {
-                cursor = mOpenHelper.getReadableDatabase().query(
-                        DatabaseContract.NoteEntry.TABLE_NAME,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        null,
-                        null,
-                        sortOrder
-                );
+                        sortOrder);
+
                 break;
             }
             case NOTEBOOKS:
@@ -127,14 +135,12 @@ public class NoteContentProvider extends ContentProvider
         {
             case NOTES:
                 return DatabaseContract.NoteEntry.CONTENT_TYPE;
-            case NOTES_FROM_NOTEBOOK:
-                return DatabaseContract.NotebookEntry.CONTENT_TYPE;
-            case NOTES_WITH_TAG:
-                return DatabaseContract.NotebookEntry.CONTENT_TYPE;
             case NOTEBOOKS:
                 return DatabaseContract.NotebookEntry.CONTENT_TYPE;
             case TAGS:
                 return DatabaseContract.TagEntry.CONTENT_TYPE;
+            case NOTE_TAGS:
+                return DatabaseContract.NoteTagsEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -182,6 +188,19 @@ public class NoteContentProvider extends ContentProvider
                 if (_id > 0)
                 {
                     returnUri = DatabaseContract.TagEntry.buildTagUri(_id);
+                }
+                else
+                {
+                    throw new android.database.SQLException("Failed to insert row into: " + uri);
+                }
+                break;
+            }
+            case NOTE_TAGS:
+            {
+                long _id = db.insert(DatabaseContract.NoteTagsEntry.TABLE_NAME, null, contentValues);
+                if (_id > 0)
+                {
+                    returnUri = DatabaseContract.NoteTagsEntry.buildTagUri(_id);
                 }
                 else
                 {
@@ -270,6 +289,27 @@ public class NoteContentProvider extends ContentProvider
                 }
                 break;
             }
+            case NOTE_TAGS:
+            {
+                db.beginTransaction();
+                try
+                {
+                    for (ContentValues value : values)
+                    {
+                        long _id = db.replace(DatabaseContract.NoteTagsEntry.TABLE_NAME, null, value);
+                        if (_id != -1)
+                        {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                }
+                finally
+                {
+                    db.endTransaction();
+                }
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -306,6 +346,11 @@ public class NoteContentProvider extends ContentProvider
             case TAGS:
             {
                 rowsDeleted = db.delete(DatabaseContract.TagEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case NOTE_TAGS:
+            {
+                rowsDeleted = db.delete(DatabaseContract.NoteTagsEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             }
             default:
