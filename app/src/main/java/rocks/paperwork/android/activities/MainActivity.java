@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         SyncAdapter.syncImmediately(this);
+        updateView();
     }
 
     private void setUpToolbar()
@@ -250,9 +251,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mTagMenu.clear();
 
-        for (Tag tag : tags)
+        for (final Tag tag : tags)
         {
-            mTagMenu.add(tag.getTitle()).setIcon(R.mipmap.ic_tags_grey);
+            MenuItem menuItem = mTagMenu.add(tag.getTitle());
+            menuItem.setIcon(R.mipmap.ic_tags_grey);
+
+            menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
+            {
+                @Override
+                public boolean onMenuItemClick(MenuItem item)
+                {
+                    setTitle(tag.getTitle());
+                    NotesFragment noteFragment = (NotesFragment) Fragment.instantiate(MainActivity.this, NotesFragment.class.getName());
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(NotesFragment.KEY_TAG, tag);
+                    noteFragment.setArguments(bundle);
+                    (getFragmentManager().beginTransaction().replace(R.id.main_container, noteFragment)).commit();
+                    mCurrentSelectedPosition = 0;
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                    return true;
+                }
+            });
         }
 
         // workaround for bug in navgationview where it's not refreshed after a new item is added

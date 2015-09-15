@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import rocks.paperwork.android.activities.NoteActivity;
 import rocks.paperwork.android.adapters.NotebookAdapter.Notebook;
 import rocks.paperwork.android.adapters.NotesAdapter;
 import rocks.paperwork.android.adapters.NotesAdapter.Note;
+import rocks.paperwork.android.adapters.Tag;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.DatabaseHelper;
 import rocks.paperwork.android.data.NoteDataSource;
@@ -36,10 +38,12 @@ public class NotesFragment extends Fragment implements AsyncCallback
 {
     public static final String KEY_NOTEBOOK = "notebook";
     public static final String KEY_SEARCH_MODE = "search_mode";
+    public static final String KEY_TAG = "tag";
     private NotesAdapter mNotesAdapter;
     private TextView emptyText;
     private SwipeRefreshLayout mSwipeContainer;
     private Notebook mNotebook;
+    private Tag mTag;
 
 
     @Override
@@ -118,6 +122,11 @@ public class NotesFragment extends Fragment implements AsyncCallback
                 isSearchMode = bundle.getBoolean(KEY_SEARCH_MODE);
                 addNote.setVisibility(isSearchMode ? View.GONE : View.VISIBLE);
             }
+
+            if(bundle.containsKey(KEY_TAG))
+            {
+                mTag = (Tag) bundle.getSerializable(KEY_TAG);
+            }
         }
 
         getActivity().getContentResolver().registerContentObserver(
@@ -154,6 +163,10 @@ public class NotesFragment extends Fragment implements AsyncCallback
         if (mNotebook != null)
         {
             notes = noteDataSource.getAllNotesFromNotebook(mNotebook);
+        }
+        else if(mTag != null)
+        {
+            notes = noteDataSource.getNotesWithTag(mTag);
         }
         else
         {

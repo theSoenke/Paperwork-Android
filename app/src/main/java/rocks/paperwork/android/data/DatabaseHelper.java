@@ -15,11 +15,12 @@ import java.util.TimeZone;
 import rocks.paperwork.android.data.DatabaseContract.NoteEntry;
 import rocks.paperwork.android.data.DatabaseContract.NotebookEntry;
 import rocks.paperwork.android.data.DatabaseContract.TagEntry;
+import rocks.paperwork.android.data.DatabaseContract.NoteTagsEntry;
 
 public class DatabaseHelper extends SQLiteOpenHelper
 {
     private static final String DATABASE_NAME = "notes.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     private static final String LOG_TAG = DatabaseHelper.class.getName();
 
     public DatabaseHelper(Context context)
@@ -79,8 +80,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
                 NoteEntry.COLUMN_NOTEBOOK_KEY + " INTEGER NOT NULL, " +
 
                 " FOREIGN KEY (" + NoteEntry.COLUMN_NOTEBOOK_KEY + ") REFERENCES " +
-                NoteEntry.TABLE_NAME +
-                " (" + NoteEntry._ID + ") " +
+                NotebookEntry.TABLE_NAME + " (" + NotebookEntry._ID + ") " +
                 " );";
 
         final String SQL_CREATE_TAG_TABLE = "CREATE TABLE " + TagEntry.TABLE_NAME +
@@ -88,9 +88,21 @@ public class DatabaseHelper extends SQLiteOpenHelper
                 TagEntry.COLUMN_TITLE + " TEXT NOT NULL " +
                 " );";
 
+        final String SQL_CREATE_TAGGED_NOTES_TABLE = "CREATE TABLE " + NoteTagsEntry.TABLE_NAME +
+                " (" + NoteTagsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                NoteTagsEntry.COLUMN_NOTE_ID + " TEXT NOT NULL, " +
+                NoteTagsEntry.COLUMN_TAG_ID + " TEXT NOT NULL, " +
+
+                " FOREIGN KEY (" + NoteTagsEntry.COLUMN_NOTE_ID + ") REFERENCES " +
+                NoteEntry.TABLE_NAME + " (" + NoteEntry._ID + "), " +
+                " FOREIGN KEY (" + NoteTagsEntry.COLUMN_TAG_ID + ") REFERENCES " +
+                TagEntry.TABLE_NAME + " (" + TagEntry._ID + ") " +
+                " );";
+
         sqLiteDatabase.execSQL(SQL_CREATE_NOTEBOOK_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_NOTE_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_TAG_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_TAGGED_NOTES_TABLE);
     }
 
     @Override
@@ -99,6 +111,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + NoteEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + NotebookEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TagEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + NoteTagsEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }

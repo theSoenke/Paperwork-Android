@@ -70,6 +70,7 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         private String mOldNotebookId;
         private Date mUpdatedAt;
         private DatabaseContract.NoteEntry.NOTE_STATUS mSyncStatus;
+        private List<Tag> mTags = new ArrayList<>();
 
         public Note(String uuid)
         {
@@ -156,6 +157,16 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
         public String getOldNotebookId()
         {
             return mOldNotebookId;
+        }
+
+        public void setTags(List<Tag> tags)
+        {
+            mTags = tags;
+        }
+
+        public List<Tag> getTags()
+        {
+            return mTags;
         }
     }
 }

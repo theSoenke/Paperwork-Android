@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import rocks.paperwork.android.adapters.Tag;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.DatabaseHelper;
 import rocks.paperwork.android.data.NoteDataSource;
@@ -461,12 +462,30 @@ public class NoteSync
         Date date = DatabaseHelper.getDateTime(jsonNote.getString("updated_at"));
         String notebookId = jsonNote.getString("notebook_id");
 
+        List<Tag> tags = new ArrayList<>();
+
+        JSONArray jsonTags = jsonNote.getJSONArray("tags");
+
+        for(int i = 0; i < jsonTags.length(); i++)
+        {
+            JSONObject jsonTag = jsonTags.getJSONObject(i);
+            String tagId = jsonTag.getString("id");
+            String tagTitle = jsonTag.getString("title");
+
+            Tag tag = new Tag(tagId);
+            tag.setTitle(tagTitle);
+
+
+            tags.add(tag);
+        }
+
         Note note = new Note(id);
         note.setNotebookId(notebookId);
         note.setTitle(title);
         note.setContent(content);
         note.setUpdatedAt(date);
         note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.synced);
+        note.setTags(tags);
 
         return note;
     }
