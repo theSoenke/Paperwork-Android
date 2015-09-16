@@ -11,12 +11,11 @@ import android.provider.BaseColumns;
 public class DatabaseContract
 {
     public static final String CONTENT_AUTHORITY = "rocks.paperwork.app";
-    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-
     public static final String PATH_NOTES = "notes";
     public static final String PATH_NOTEBOOKS = "notebooks";
     public static final String PATH_TAGS = "tags";
     public static final String PATH_NOTE_TAGS = "tagged_notes";
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     public static class NoteEntry implements BaseColumns
     {
@@ -32,6 +31,11 @@ public class DatabaseContract
         public static Uri buildNoteUri(long id)
         {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildNoteWithTagUri()
+        {
+            return CONTENT_URI.buildUpon().appendPath(TagEntry.TABLE_NAME).build();
         }
 
         public enum NOTE_STATUS
@@ -78,6 +82,12 @@ public class DatabaseContract
         {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
+
+        public static Uri buildTagsFromNoteUri()
+        {
+            return CONTENT_URI.buildUpon().appendPath(NoteEntry.TABLE_NAME).build();
+        }
+
     }
 
     public static final class NoteTagsEntry implements BaseColumns

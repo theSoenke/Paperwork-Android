@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         for (final Tag tag : tags)
         {
-            MenuItem menuItem = mTagMenu.add(tag.getTitle());
+            final MenuItem menuItem = mTagMenu.add(tag.getTitle());
             menuItem.setIcon(R.mipmap.ic_tags_grey);
 
             menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
@@ -267,7 +267,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     bundle.putSerializable(NotesFragment.KEY_TAG, tag);
                     noteFragment.setArguments(bundle);
                     (getFragmentManager().beginTransaction().replace(R.id.main_container, noteFragment)).commit();
-                    mCurrentSelectedPosition = 0;
                     mDrawerLayout.closeDrawer(GravityCompat.START);
                     return true;
                 }

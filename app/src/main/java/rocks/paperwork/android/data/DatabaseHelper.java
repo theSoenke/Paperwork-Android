@@ -13,9 +13,9 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import rocks.paperwork.android.data.DatabaseContract.NoteEntry;
+import rocks.paperwork.android.data.DatabaseContract.NoteTagsEntry;
 import rocks.paperwork.android.data.DatabaseContract.NotebookEntry;
 import rocks.paperwork.android.data.DatabaseContract.TagEntry;
-import rocks.paperwork.android.data.DatabaseContract.NoteTagsEntry;
 
 public class DatabaseHelper extends SQLiteOpenHelper
 {

@@ -8,36 +8,41 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 public class NoteContentProvider extends ContentProvider
 {
     private static final int NOTES = 100;
+    private static final int NOTES_WITH_TAG = 101;
     private static final int NOTEBOOKS = 200;
     private static final int TAGS = 300;
+    private static final int TAGS_OF_NOTE = 301;
     private static final int NOTE_TAGS = 400;
     private static final UriMatcher sUriMatcher = buildUriMatcher();
-    private DatabaseHelper mOpenHelper;
+    private static final SQLiteQueryBuilder sTaggedNotesQueryBuilder;
+    private static final SQLiteQueryBuilder sTagsOfNoteQueryBuilder;
 
-    private static final SQLiteQueryBuilder sNotesByTagQueryBuilder;
 
     static
     {
-        sNotesByTagQueryBuilder = new SQLiteQueryBuilder();
-        sNotesByTagQueryBuilder.setTables(DatabaseContract.NoteEntry.TABLE_NAME + " INNER JOIN " +
+        sTaggedNotesQueryBuilder = new SQLiteQueryBuilder();
+        sTaggedNotesQueryBuilder.setTables(DatabaseContract.NoteEntry.TABLE_NAME + " INNER JOIN " +
                 DatabaseContract.NoteTagsEntry.TABLE_NAME +
                 " ON " + DatabaseContract.NoteTagsEntry.TABLE_NAME +
                 "." + DatabaseContract.NoteTagsEntry.COLUMN_NOTE_ID +
                 " = " + DatabaseContract.NoteEntry.TABLE_NAME +
                 "." + DatabaseContract.NoteEntry._ID);
+
+        sTagsOfNoteQueryBuilder = new SQLiteQueryBuilder();
+        sTagsOfNoteQueryBuilder.setTables(DatabaseContract.TagEntry.TABLE_NAME + " INNER JOIN " +
+                DatabaseContract.NoteTagsEntry.TABLE_NAME +
+                " ON " + DatabaseContract.NoteTagsEntry.TABLE_NAME +
+                "." + DatabaseContract.NoteTagsEntry.COLUMN_TAG_ID +
+                " = " + DatabaseContract.TagEntry.TABLE_NAME +
+                "." + DatabaseContract.TagEntry._ID);
     }
 
-    private static final String sNotesByTagSelection =
-            DatabaseContract.NoteTagsEntry.TABLE_NAME +
-                    "." + DatabaseContract.NoteTagsEntry.COLUMN_TAG_ID + " = ?";
-
-    private static final String sTagsByNoteSelection =
-            DatabaseContract.NoteEntry.TABLE_NAME +
-                    "." + DatabaseContract.NoteEntry._ID + " = ? ";
+    private DatabaseHelper mOpenHelper;
 
     private static UriMatcher buildUriMatcher()
     {
@@ -45,8 +50,10 @@ public class NoteContentProvider extends ContentProvider
         final String authority = DatabaseContract.CONTENT_AUTHORITY;
 
         matcher.addURI(authority, DatabaseContract.PATH_NOTES, NOTES);
+        matcher.addURI(authority, DatabaseContract.PATH_NOTES + "/*", NOTES_WITH_TAG);
         matcher.addURI(authority, DatabaseContract.PATH_NOTEBOOKS, NOTEBOOKS);
         matcher.addURI(authority, DatabaseContract.PATH_TAGS, TAGS);
+        matcher.addURI(authority, DatabaseContract.PATH_TAGS + "/*", TAGS_OF_NOTE);
         matcher.addURI(authority, DatabaseContract.PATH_NOTE_TAGS, NOTE_TAGS);
 
         return matcher;
@@ -64,6 +71,7 @@ public class NoteContentProvider extends ContentProvider
     {
         Cursor cursor;
 
+
         switch (sUriMatcher.match(uri))
         {
             case NOTES:
@@ -80,12 +88,12 @@ public class NoteContentProvider extends ContentProvider
 
                 break;
             }
-            case NOTE_TAGS:
+            case  NOTES_WITH_TAG:
             {
-                cursor = sNotesByTagQueryBuilder.query(
+                cursor = sTaggedNotesQueryBuilder.query(
                         mOpenHelper.getReadableDatabase(),
                         projection,
-                        sNotesByTagSelection,
+                        selection,
                         selectionArgs,
                         null,
                         null,
@@ -119,6 +127,19 @@ public class NoteContentProvider extends ContentProvider
                 );
                 break;
             }
+            case TAGS_OF_NOTE:
+            {
+                cursor = sTagsOfNoteQueryBuilder.query(
+                        mOpenHelper.getReadableDatabase(),
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -135,9 +156,13 @@ public class NoteContentProvider extends ContentProvider
         {
             case NOTES:
                 return DatabaseContract.NoteEntry.CONTENT_TYPE;
+            case  NOTES_WITH_TAG:
+                return DatabaseContract.NoteEntry.CONTENT_TYPE;
             case NOTEBOOKS:
                 return DatabaseContract.NotebookEntry.CONTENT_TYPE;
             case TAGS:
+                return DatabaseContract.TagEntry.CONTENT_TYPE;
+            case TAGS_OF_NOTE:
                 return DatabaseContract.TagEntry.CONTENT_TYPE;
             case NOTE_TAGS:
                 return DatabaseContract.NoteTagsEntry.CONTENT_TYPE;

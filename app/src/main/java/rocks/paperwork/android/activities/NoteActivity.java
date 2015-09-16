@@ -22,6 +22,7 @@ import java.util.UUID;
 import rocks.paperwork.android.R;
 import rocks.paperwork.android.adapters.NotesAdapter;
 import rocks.paperwork.android.adapters.NotesAdapter.Note;
+import rocks.paperwork.android.adapters.Tag;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.DatabaseHelper;
 import rocks.paperwork.android.data.NoteDataSource;

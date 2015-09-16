@@ -3,6 +3,7 @@ package rocks.paperwork.android.data;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -123,6 +124,8 @@ public class NoteDataSource
                 note.setUpdatedAt(date);
                 note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.values()[cursor.getInt(syncColumn)]);
                 note.setNotebookId(cursor.getString(notebookColumn));
+                note.setTags(getTagsOfNote(note));
+
                 notes.add(note);
             }
         }
@@ -137,12 +140,16 @@ public class NoteDataSource
     {
         List<Note> notes = new ArrayList<>();
 
+        String selection =
+                DatabaseContract.NoteTagsEntry.TABLE_NAME +
+                        "." + DatabaseContract.NoteTagsEntry.COLUMN_TAG_ID + " = ?";
+
         String[] selectionArgs = new String[]{tag.getId()};
 
         Cursor cursor = mContext.getContentResolver().query(
-                DatabaseContract.NoteTagsEntry.CONTENT_URI,
+                DatabaseContract.NoteEntry.buildNoteWithTagUri(),
                 null,
-                null,
+                selection,
                 selectionArgs,
                 null);
 
@@ -164,6 +171,8 @@ public class NoteDataSource
                 note.setUpdatedAt(date);
                 note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.values()[cursor.getInt(syncColumn)]);
                 note.setNotebookId(cursor.getString(notebookColumn));
+                note.setTags(getTagsOfNote(note));
+
                 notes.add(note);
             }
         }
@@ -204,6 +213,8 @@ public class NoteDataSource
                 note.setUpdatedAt(date);
                 note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.values()[cursor.getInt(syncColumn)]);
                 note.setNotebookId(cursor.getString(notebookColumn));
+                note.setTags(getTagsOfNote(note));
+
                 notes.add(note);
             }
         }
@@ -218,6 +229,7 @@ public class NoteDataSource
     public List<Tag> getAllTags()
     {
         List<Tag> tags = new ArrayList<>();
+
         Cursor cursor = mContext.getContentResolver().query(
                 DatabaseContract.TagEntry.CONTENT_URI,
                 null,
@@ -244,6 +256,45 @@ public class NoteDataSource
 
         return tags;
     }
+
+    public List<Tag> getTagsOfNote(Note note)
+    {
+        List<Tag> tags = new ArrayList<>();
+
+        String selection =
+                DatabaseContract.NoteTagsEntry.TABLE_NAME +
+                        "." + DatabaseContract.NoteTagsEntry.COLUMN_NOTE_ID + " = ?";
+
+        String[] selectionArgs = new String[]{note.getId()};
+
+        Cursor cursor = mContext.getContentResolver().query(
+                DatabaseContract.TagEntry.buildTagsFromNoteUri(),
+                null,
+                selection,
+                selectionArgs,
+                null);
+
+        try
+        {
+            int uuidColumn = cursor.getColumnIndex(DatabaseContract.TagEntry._ID);
+            int titleColumn = cursor.getColumnIndex(DatabaseContract.TagEntry.COLUMN_TITLE);
+
+            while (cursor.moveToNext())
+            {
+                Tag tag = new Tag(cursor.getString(uuidColumn));
+                tag.setTitle(cursor.getString(titleColumn));
+                Log.e("tag title", tag.getTitle());
+                tags.add(tag);
+            }
+        }
+        finally
+        {
+            cursor.close();
+        }
+
+        return tags;
+    }
+
 
     public void insertNotebook(Notebook notebook)
     {

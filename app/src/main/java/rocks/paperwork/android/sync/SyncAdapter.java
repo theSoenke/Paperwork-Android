@@ -185,11 +185,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             // update local database
             dataSource.bulkInsertNotes(notesToSync.remoteNewNotes);
 
-            for(Note note : notesToSync.remoteNewNotes)
+            for (Note note : notesToSync.remoteNewNotes)
             {
                 dataSource.deleteTagsOfNote(note);
 
-                for(Tag tag : note.getTags())
+                for (Tag tag : note.getTags())
                 {
                     dataSource.insertTaggedNote(tag, note);
                 }
@@ -200,7 +200,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
                 dataSource.updateNote(note);
                 dataSource.deleteTagsOfNote(note);
 
-                for(Tag tag : note.getTags())
+                for (Tag tag : note.getTags())
                 {
                     dataSource.insertTaggedNote(tag, note);
                 }
@@ -209,6 +209,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
             for (Note note : notesToSync.localNotesToDelete)
             {
                 dataSource.deleteNote(note);
+                dataSource.deleteTagsOfNote(note);
             }
 
         }
