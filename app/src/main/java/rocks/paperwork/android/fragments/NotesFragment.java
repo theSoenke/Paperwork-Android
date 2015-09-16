@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,7 +122,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
                 addNote.setVisibility(isSearchMode ? View.GONE : View.VISIBLE);
             }
 
-            if(bundle.containsKey(KEY_TAG))
+            if (bundle.containsKey(KEY_TAG))
             {
                 mTag = (Tag) bundle.getSerializable(KEY_TAG);
             }
@@ -164,7 +163,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
         {
             notes = noteDataSource.getAllNotesFromNotebook(mNotebook);
         }
-        else if(mTag != null)
+        else if (mTag != null)
         {
             notes = noteDataSource.getNotesWithTag(mTag);
         }

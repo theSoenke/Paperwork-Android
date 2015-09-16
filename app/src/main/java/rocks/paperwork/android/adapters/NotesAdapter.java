@@ -159,14 +159,14 @@ public class NotesAdapter extends ArrayAdapter<NotesAdapter.Note>
             return mOldNotebookId;
         }
 
-        public void setTags(List<Tag> tags)
-        {
-            mTags = tags;
-        }
-
         public List<Tag> getTags()
         {
             return mTags;
+        }
+
+        public void setTags(List<Tag> tags)
+        {
+            mTags = tags;
         }
     }
 }

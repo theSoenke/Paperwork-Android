@@ -95,14 +95,14 @@ public class NotebookAdapter extends ArrayAdapter<Notebook>
             mUpdatedAt = date;
         }
 
-        public void setSyncStatus(DatabaseContract.NotebookEntry.NOTEBOOK_STATUS status)
-        {
-            mSyncStatus = status;
-        }
-
         public DatabaseContract.NotebookEntry.NOTEBOOK_STATUS getSyncStatus()
         {
             return mSyncStatus;
+        }
+
+        public void setSyncStatus(DatabaseContract.NotebookEntry.NOTEBOOK_STATUS status)
+        {
+            mSyncStatus = status;
         }
 
     }

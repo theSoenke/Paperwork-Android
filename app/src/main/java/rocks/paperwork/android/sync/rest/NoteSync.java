@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import rocks.paperwork.android.adapters.NotesAdapter.Note;
 import rocks.paperwork.android.adapters.Tag;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.DatabaseHelper;
 import rocks.paperwork.android.data.NoteDataSource;
-import rocks.paperwork.android.adapters.NotesAdapter.Note;
 
 /**
  * Syncs notes with the server and parses note json
@@ -466,7 +466,7 @@ public class NoteSync
 
         JSONArray jsonTags = jsonNote.getJSONArray("tags");
 
-        for(int i = 0; i < jsonTags.length(); i++)
+        for (int i = 0; i < jsonTags.length(); i++)
         {
             JSONObject jsonTag = jsonTags.getJSONObject(i);
             String tagId = jsonTag.getString("id");
@@ -474,7 +474,6 @@ public class NoteSync
 
             Tag tag = new Tag(tagId);
             tag.setTitle(tagTitle);
-
 
             tags.add(tag);
         }
