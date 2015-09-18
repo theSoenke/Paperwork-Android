@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -290,11 +291,16 @@ public class NotesFragment extends Fragment implements AsyncCallback
                 {
                     public void onClick(DialogInterface dialog, int which)
                     {
-                        note.setNotebookId(allNotebooks.get(which).getId());
-                        note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
-                        note.setUpdatedAt(DatabaseHelper.getCurrentTime());
-                        NoteDataSource.getInstance(getActivity()).updateNote(note);
-                        SyncAdapter.syncImmediately(getActivity());
+                        Notebook notebook = allNotebooks.get(which);
+
+                        if (!note.getNotebookId().equals(notebook.getId()))
+                        {
+                            note.setNotebookId(notebook.getId());
+                            note.setSyncStatus(DatabaseContract.NoteEntry.NOTE_STATUS.edited);
+                            note.setUpdatedAt(DatabaseHelper.getCurrentTime());
+                            NoteDataSource.getInstance(getActivity()).updateNote(note);
+                            SyncAdapter.syncImmediately(getActivity());
+                        }
                     }
                 });
         AlertDialog dialog = builder.create();

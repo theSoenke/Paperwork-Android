@@ -245,7 +245,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void updateView()
     {
-        // TODO put in the right place and set tag icons
         NoteDataSource notesDataSource = NoteDataSource.getInstance(this);
         List<Tag> tags = notesDataSource.getAllTags();
 
