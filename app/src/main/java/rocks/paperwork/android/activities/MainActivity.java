@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         for (final Tag tag : tags)
         {
             final MenuItem menuItem = mTagMenu.add(tag.getTitle());
-            menuItem.setIcon(R.mipmap.ic_tags_grey);
+            menuItem.setIcon(R.drawable.ic_tag);
 
             menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
             {
