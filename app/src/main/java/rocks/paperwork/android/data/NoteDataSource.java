@@ -283,7 +283,6 @@ public class NoteDataSource
             {
                 Tag tag = new Tag(cursor.getString(uuidColumn));
                 tag.setTitle(cursor.getString(titleColumn));
-                Log.e("tag title", tag.getTitle());
                 tags.add(tag);
             }
         }
