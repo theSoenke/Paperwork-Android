@@ -7,5 +7,10 @@
         android:orderInCategory="100"
         android:title="@string/delete_note"
         app:showAsAction="never"/>
-</menu>
 
+    <item
+        android:id="@+id/attach_file"
+        android:icon="@drawable/ic_attach"
+        android:title="string/attach"
+        app:showAsAction="always"/>
+</menu>

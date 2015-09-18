@@ -11,6 +11,10 @@
     <string name="empty_note">Note was not saved</string>
     <string name="save">Save</string>
     <string name="delete_note">Delete Note</string>
+    <string name="attach_file">Attach file</string>
+    <string name="image">Image</string>
+    <string name="file">File</string>
+    <string name="take_photo">Take photo</string>
     <string name="search">Search</string>
     <string name="drawer_open">Menu opened</string>
     <string name="drawer_close">Menu closed</string>

@@ -17,12 +17,13 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import com.cocosw.bottomsheet.BottomSheet;
+
 import java.util.UUID;
 
 import rocks.paperwork.android.R;
 import rocks.paperwork.android.adapters.NotesAdapter;
 import rocks.paperwork.android.adapters.NotesAdapter.Note;
-import rocks.paperwork.android.adapters.Tag;
 import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.DatabaseHelper;
 import rocks.paperwork.android.data.NoteDataSource;
@@ -202,6 +203,10 @@ public class NoteActivity extends AppCompatActivity
             }
             return true;
         }
+        else if (id == R.id.attach_file)
+        {
+            showUploadAttachmentDialog();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -356,5 +361,26 @@ public class NoteActivity extends AppCompatActivity
                 });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void showUploadAttachmentDialog()
+    {
+        new BottomSheet.Builder(this).title(R.string.attach_file).sheet(R.menu.menu_attachment)
+                .listener(new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        switch (which)
+                        {
+                            case R.id.image:
+                                break;
+                            case R.id.file:
+                                break;
+                            case R.id.take_photo:
+                                break;
+                        }
+                    }
+                }).show();
     }
 }
