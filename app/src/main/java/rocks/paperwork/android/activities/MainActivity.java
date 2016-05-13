@@ -86,8 +86,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mUserLearnedDrawer = Boolean.valueOf(HostPreferences.readSharedSetting(this, HostPreferences.PREF_USER_LEARNED_DRAWER, "false"));
         mNavigationView.setNavigationItemSelectedListener(this);
 
+        View header = mNavigationView.getHeaderView(0);
+
         String email = HostPreferences.readSharedSetting(this, "email", "");
-        TextView userEmail = (TextView) findViewById(R.id.user_email);
+        TextView userEmail = (TextView) header.findViewById(R.id.user_email);
         userEmail.setText(email);
 
         setUpToolbar();
