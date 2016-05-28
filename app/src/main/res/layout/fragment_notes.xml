@@ -41,7 +41,7 @@
         android:layout_alignParentRight="true"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@mipmap/ic_add"
+        android:src="@drawable/ic_add_white"
         app:backgroundTint="@color/primaryColor"
         app:borderWidth="0dp"
         app:layout_anchor="@id/list_notebooks"

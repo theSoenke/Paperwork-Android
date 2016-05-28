@@ -4,11 +4,11 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_all_notes"
-            android:icon="@mipmap/ic_note_grey"
+            android:icon="@drawable/ic_note_grey"
             android:title="@string/all_notes"/>
         <item
             android:id="@+id/nav_notebooks"
-            android:icon="@mipmap/ic_notebook_grey"
+            android:icon="@drawable/ic_notebook_grey"
             android:title="@string/notebooks"/>
     </group>
 </menu>

@@ -52,7 +52,7 @@
         android:layout_alignParentRight="true"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@mipmap/ic_edit"
+        android:src="@drawable/ic_edit_white"
         app:backgroundTint="@color/primaryColor"
         app:borderWidth="0dp"
         app:layout_anchor="@id/note_edit_content"

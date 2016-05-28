@@ -206,7 +206,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Select a notebook").setIcon(R.mipmap.ic_notebook_grey)
+        builder.setTitle("Select a notebook").setIcon(R.drawable.ic_notebook_grey)
                 .setItems(notebookChars, new DialogInterface.OnClickListener()
                 {
                     public void onClick(DialogInterface dialog, int which)
@@ -285,7 +285,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(getString(R.string.move_to)).setIcon(R.mipmap.ic_notebook_grey)
+        builder.setTitle(getString(R.string.move_to)).setIcon(R.drawable.ic_notebook_grey)
                 .setItems(notebookChars, new DialogInterface.OnClickListener()
                 {
                     public void onClick(DialogInterface dialog, int which)
