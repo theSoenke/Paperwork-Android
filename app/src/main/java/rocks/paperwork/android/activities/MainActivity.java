@@ -17,9 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.widget.BaseAdapter;
-import android.widget.HeaderViewListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -45,11 +42,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean mUserLearnedDrawer;
     private SubMenu mTagMenu;
     private NavigationView mNavigationView;
-
-    public static MainActivity getInstance()
-    {
-        return sInstance;
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState)
@@ -114,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawerToggle.syncState();
 
         getContentResolver().registerContentObserver(
-                DatabaseContract.NoteEntry.CONTENT_URI, true, new ContentObserver(new Handler(getMainLooper()))
+                DatabaseContract.TagEntry.CONTENT_URI, true, new ContentObserver(new Handler(getMainLooper()))
                 {
                     @Override
                     public void onChange(boolean selfChange)
@@ -272,20 +264,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     return true;
                 }
             });
-        }
-
-        // workaround for bug in navgationview where it's not refreshed after a new item is added
-        // https://code.google.com/p/android/issues/detail?id=176300
-        for (int i = 0, count = mNavigationView.getChildCount(); i < count; i++)
-        {
-            final View child = mNavigationView.getChildAt(i);
-            if (child != null && child instanceof ListView)
-            {
-                final ListView menuView = (ListView) child;
-                final HeaderViewListAdapter adapter = (HeaderViewListAdapter) menuView.getAdapter();
-                final BaseAdapter wrapped = (BaseAdapter) adapter.getWrappedAdapter();
-                wrapped.notifyDataSetChanged();
-            }
         }
     }
 }
