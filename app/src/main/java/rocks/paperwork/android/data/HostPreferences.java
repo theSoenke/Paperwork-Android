@@ -35,6 +35,6 @@ public class HostPreferences
     public static boolean preferencesExist(Context context)
     {
         SharedPreferences sharedPref = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        return !(sharedPref == null || !sharedPref.contains(HOST) || !sharedPref.contains(HASH));
+        return (sharedPref != null && sharedPref.contains(HOST) && sharedPref.contains(HASH));
     }
 }

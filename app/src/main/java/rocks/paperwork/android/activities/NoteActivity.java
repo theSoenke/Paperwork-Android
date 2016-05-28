@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -93,7 +94,8 @@ public class NoteActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
         {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            getWindow().setStatusBarColor(getResources().getColor(R.color.toolbar_text));
+            int color = ContextCompat.getColor(this, R.color.toolbar_text);
+            getWindow().setStatusBarColor(color);
         }
     }
 

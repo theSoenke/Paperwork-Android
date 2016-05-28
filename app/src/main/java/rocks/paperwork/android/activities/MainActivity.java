@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this, mDrawerLayout, mToolbar,
                 R.string.drawer_open, R.string.drawer_close
         );
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
         getContentResolver().registerContentObserver(
