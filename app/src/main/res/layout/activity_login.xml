@@ -8,18 +8,6 @@
     tools:context="rocks.paperwork.android.activities.LoginActivity">
 
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_actionbar"
-        style="@style/ToolBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/primaryColor"
-        android:minHeight="?attr/actionBarSize"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:title="@string/action_sign_in"
-        app:titleTextAppearance="@style/AppTheme.Toolbar.Title" />
-
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
@@ -39,6 +27,21 @@
                 android:layout_gravity="center_horizontal"
                 android:background="@mipmap/ic_launcher"/>-->
 
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:id="@+id/imageView"
+                android:src="@drawable/logo" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Paperwork"
+                android:gravity="center"
+                android:id="@+id/textView"
+                android:textSize="25dp" />
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/host_url"
