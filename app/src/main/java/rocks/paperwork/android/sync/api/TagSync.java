@@ -1,4 +1,4 @@
-package rocks.paperwork.android.sync.rest;
+package rocks.paperwork.android.sync.api;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -106,7 +106,7 @@ public class NotebooksFragment extends Fragment implements AsyncCallback
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.create_notebook_title))
                 .setView(userInput)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)

@@ -87,7 +87,6 @@ public class DatabaseContract
         {
             return CONTENT_URI.buildUpon().appendPath(NoteEntry.TABLE_NAME).build();
         }
-
     }
 
     public static final class NoteTagsEntry implements BaseColumns

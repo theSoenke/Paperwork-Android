@@ -22,16 +22,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import rocks.paperwork.android.R;
 import rocks.paperwork.android.adapters.NotebookAdapter.Notebook;
 import rocks.paperwork.android.adapters.NotesAdapter.Note;
 import rocks.paperwork.android.adapters.Tag;
+import rocks.paperwork.android.data.DatabaseContract;
 import rocks.paperwork.android.data.HostPreferences;
 import rocks.paperwork.android.data.NoteDataSource;
-import rocks.paperwork.android.sync.rest.FetchTask;
-import rocks.paperwork.android.sync.rest.NoteSync;
-import rocks.paperwork.android.sync.rest.NotebookSync;
-import rocks.paperwork.android.sync.rest.TagSync;
+import rocks.paperwork.android.sync.api.FetchTask;
+import rocks.paperwork.android.sync.api.NoteSync;
+import rocks.paperwork.android.sync.api.NotebookSync;
+import rocks.paperwork.android.sync.api.TagSync;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter
 {
@@ -48,8 +48,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(getSyncAccount(context),
-                context.getString(R.string.content_authority), bundle);
+        ContentResolver.requestSync(getSyncAccount(context), DatabaseContract.CONTENT_AUTHORITY, bundle);
     }
 
     public static void syncImmediately(Context context, SwipeRefreshLayout refreshLayout)
@@ -66,8 +65,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(getSyncAccount(context),
-                context.getString(R.string.content_authority), bundle);
+        ContentResolver.requestSync(getSyncAccount(context), DatabaseContract.CONTENT_AUTHORITY, bundle);
     }
 
     // TODO use paperwork account instead of fake account
@@ -77,9 +75,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
         AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
         // Create the account type and default account
-        Account newAccount = new Account(
-                context.getString(R.string.app_name),
-                context.getString(R.string.sync_account_type));
+        Account newAccount = new Account("Jon Doe", "paperwork.rocks");
 
         // If the password doesn't exist, the account doesn't exist
         if (null == accountManager.getPassword(newAccount))

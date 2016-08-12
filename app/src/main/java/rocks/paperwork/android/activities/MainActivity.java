@@ -35,7 +35,6 @@ import rocks.paperwork.android.sync.SyncAdapter;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback
 {
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
-    private static MainActivity sInstance;
     private DrawerLayout mDrawerLayout;
     private Toolbar mToolbar;
     private int mCurrentSelectedPosition;
@@ -61,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        sInstance = this;
 
         if (!HostPreferences.preferencesExist(this))
         {
@@ -84,8 +82,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView userEmail = (TextView) header.findViewById(R.id.user_email);
         userEmail.setText(email);
 
-        setUpToolbar();
-        setUpNavDrawer();
+        setupToolbar();
+        setupNavDrawer();
 
         if (savedInstanceState != null)
         {
@@ -100,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar,
-                R.string.drawer_open, R.string.drawer_close
+                R.string.menu_open, R.string.menu_close
         );
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
@@ -120,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         updateView();
     }
 
-    private void setUpToolbar()
+    private void setupToolbar()
     {
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         if (mToolbar != null)
@@ -129,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void setUpNavDrawer()
+    private void setupNavDrawer()
     {
         if (mToolbar != null)
         {

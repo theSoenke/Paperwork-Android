@@ -239,10 +239,10 @@ public class NotesFragment extends Fragment implements AsyncCallback
         final Note note = mNotesAdapter.getItem(position);
         CharSequence[] options = {
                 getString(R.string.edit),
-                getString(R.string.share),
+                getString(R.string.share_note),
                 getString(R.string.add_tag),
                 getString(R.string.move_to),
-                getString(R.string.delete)};
+                getString(R.string.delete_title)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setItems(options, new DialogInterface.OnClickListener()
@@ -309,9 +309,9 @@ public class NotesFragment extends Fragment implements AsyncCallback
     private void showDeleteNoteDialog(final Note note)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(getString(R.string.delete) + ": " + note.getTitle())
+        builder.setTitle(getString(R.string.delete_title) + ": " + note.getTitle())
                 .setMessage(R.string.delete_note_message)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)

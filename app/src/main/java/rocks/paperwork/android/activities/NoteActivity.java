@@ -307,7 +307,7 @@ public class NoteActivity extends AppCompatActivity
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.discard).setMessage(R.string.discard_changes)
-                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                    .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener()
                     {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i)
@@ -340,9 +340,9 @@ public class NoteActivity extends AppCompatActivity
     private void showDeleteNoteDialog()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
-        builder.setTitle(getString(R.string.delete) + ": " + mNote.getTitle())
+        builder.setTitle(getString(R.string.delete_title) + ": " + mNote.getTitle())
                 .setMessage(R.string.delete_note_message)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)

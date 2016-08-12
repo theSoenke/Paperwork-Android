@@ -331,7 +331,7 @@ public class LoginActivity extends Activity
             else
             {
                 HostPreferences.clearPreferences(LoginActivity.this);
-                mHostView.setError(getString(R.string.timeout_error));
+                mHostView.setError(getString(R.string.error_timeout));
                 mHostView.requestFocus();
             }
 
