@@ -13,4 +13,4 @@ build/
 .DS_Store
 Thumbs.db
 
-
+.phraseapp.yml

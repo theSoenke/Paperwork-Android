@@ -206,7 +206,7 @@ public class NotesFragment extends Fragment implements AsyncCallback
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Select a notebook").setIcon(R.drawable.ic_notebook_grey)
+        builder.setTitle(R.string.notebook_selection_title).setIcon(R.drawable.ic_notebook_grey)
                 .setItems(notebookChars, new DialogInterface.OnClickListener()
                 {
                     public void onClick(DialogInterface dialog, int which)

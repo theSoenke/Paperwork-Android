@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="about">Über</string>
+  <string name="action_sign_in">Einloggen</string>
+  <string name="add_tag">Tag hinzufügen</string>
+  <string name="all_notes">Alle Notizen</string>
+  <string name="attach_file">Datei anhängen</string>
+  <string name="auth_email">Email</string>
+  <string name="auth_host_url">Server adresse https://…</string>
+  <string name="auth_password">Passwort</string>
+  <string name="cancel">Abbrechen</string>
+  <string name="confirm">OK</string>
+  <string name="create_notebook_title">Notizbuch erstellen</string>
+  <string name="delete_note">Notiz löschen</string>
+  <string name="delete_note_message">Bist du sicher, das diese Notiz gelöscht werden soll?</string>
+  <string name="delete_title">Löschen</string>
+  <string name="discard">Abbrechen?</string>
+  <string name="discard_changes">Deine Veränderungen wurden noch nicht gespeichert. Bist du sicher, dass die Änderungen verworfen werden sollen?</string>
+  <string name="edit">Bearbeiten</string>
+  <string name="empty_note">Notiz wurde nicht gespeichert</string>
+  <string name="empty_note_hint">Schreibe eine Notiz</string>
+  <string name="empty_title_error">Title kann nicht leer sein</string>
+  <string name="empty_title_hint">Dein Notiztitel</string>
+  <string name="error_field_required">Diese Feld wird benötgt</string>
+  <string name="error_incorrect_password">Passwort oder Email ist inkorrekt</string>
+  <string name="error_invalid_email">Keine gültige Email</string>
+  <!-- Login error messages -->
+  <string name="error_invalid_url">Die URL ist nicht korrekt</string>
+  <string name="error_timeout">Keine Verbindung zum Server möglich</string>
+  <string name="file">Datei</string>
+  <string name="image">Bild</string>
+  <string name="logout">Ausloggen</string>
+  <string name="menu_close">Menü geschlossen</string>
+  <string name="menu_open">Menu geöffnet</string>
+  <string name="more">Mehr</string>
+  <string name="move_to">Verschieben nach</string>
+  <string name="move_to_message">Wähle ein neuen Notizbuch für diese Notiz</string>
+  <string name="note">Notiz</string>
+  <string name="notebooks">Notizbücher</string>
+  <string name="notebook_selection_title">Wähle ein Notizbuch</string>
+  <string name="notes">notizen</string>
+  <string name="no_notes">Keine Notizen</string>
+  <string name="save_note">Speichern</string>
+  <string name="search">Suchen</string>
+  <string name="settings">Einstellungen</string>
+  <string name="share_note">Teilen</string>
+  <string name="tags">Tags</string>
+  <string name="take_photo">Foto aufnehmen</string>
+  <!-- Strings related to login -->
+  <string name="title_activity_login">Einloggen</string>
+  <string name="wait">Bitte warten…</string>
+</resources>
