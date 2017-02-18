@@ -53,8 +53,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/auth_host_url"
                     android:inputType="textUri"
-                    android:maxLines="1"
-                    android:singleLine="true" />
+                    android:maxLines="1"/>
             </android.support.design.widget.TextInputLayout>
 
 
@@ -68,8 +67,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/auth_email"
                     android:inputType="textEmailAddress"
-                    android:maxLines="1"
-                    android:singleLine="true" />
+                    android:maxLines="1"/>
             </android.support.design.widget.TextInputLayout>
 
 
@@ -85,8 +83,7 @@
                     android:imeActionId="@+id/login"
                     android:imeOptions="actionDone"
                     android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:singleLine="true" />
+                    android:maxLines="1"/>
             </android.support.design.widget.TextInputLayout>
 
 
@@ -98,7 +95,6 @@
                 android:layout_marginTop="10dp"
                 android:text="@string/action_sign_in"
                 android:textColor="@color/clouds" />
-
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
