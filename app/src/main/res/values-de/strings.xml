@@ -5,7 +5,7 @@
   <string name="add_tag">Tag hinzufügen</string>
   <string name="all_notes">Alle Notizen</string>
   <string name="attach_file">Datei anhängen</string>
-  <string name="auth_email">Email</string>
+  <string name="auth_user">Email oder Nutzername</string>
   <string name="auth_host_url">Server adresse https://…</string>
   <string name="auth_password">Passwort</string>
   <string name="cancel">Abbrechen</string>
@@ -23,7 +23,6 @@
   <string name="empty_title_hint">Dein Notiztitel</string>
   <string name="error_field_required">Diese Feld wird benötgt</string>
   <string name="error_incorrect_password">Passwort oder Email ist inkorrekt</string>
-  <string name="error_invalid_email">Keine gültige Email</string>
   <!-- Login error messages -->
   <string name="error_invalid_url">Die URL ist nicht korrekt</string>
   <string name="error_timeout">Keine Verbindung zum Server möglich</string>

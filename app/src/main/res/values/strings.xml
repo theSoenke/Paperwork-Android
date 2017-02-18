@@ -5,7 +5,7 @@
   <string name="add_tag">Add Tag</string>
   <string name="all_notes">All notes</string>
   <string name="attach_file">Attach file</string>
-  <string name="auth_email">Email</string>
+  <string name="auth_user">Email or username</string>
   <string name="auth_host_url">Server address https://…</string>
   <string name="auth_password">Password</string>
   <string name="cancel">Cancel</string>
@@ -23,7 +23,6 @@
   <string name="empty_title_hint">Your note title</string>
   <string name="error_field_required">This field is required</string>
   <string name="error_incorrect_password">Password or email is incorrect</string>
-  <string name="error_invalid_email">This email address is invalid</string>
   <!-- Login error messages -->
   <string name="error_invalid_url">This url is invalid</string>
   <string name="error_timeout">The server is not responding</string>

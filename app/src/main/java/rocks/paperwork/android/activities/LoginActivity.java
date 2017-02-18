@@ -42,7 +42,7 @@ public class LoginActivity extends Activity
 {
     private UserLoginTask mAuthTask = null; // Keep track of the login task to ensure we can cancel it if requested.
     private TextInputLayout mHostView;
-    private TextInputLayout mEmailView;
+    private TextInputLayout mUserView;
     private TextInputLayout mPasswordView;
     private ProgressDialog mProgressDialog;
 
@@ -54,7 +54,7 @@ public class LoginActivity extends Activity
 
         // Set up the login form.
         mHostView = (TextInputLayout) findViewById(R.id.host_url);
-        mEmailView = (TextInputLayout) findViewById(R.id.email);
+        mUserView = (TextInputLayout) findViewById(R.id.user);
         mPasswordView = (TextInputLayout) findViewById(R.id.password);
 
         mPasswordView.getEditText().setOnEditorActionListener(new TextView.OnEditorActionListener()
@@ -99,13 +99,13 @@ public class LoginActivity extends Activity
 
         // Reset errors.
         mHostView.setError(null);
-        mEmailView.setError(null);
+        mUserView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
         String host = mHostView.getEditText().getText().toString();
         host = formatUrl(host);
-        String email = mEmailView.getEditText().getText().toString();
+        String user = mUserView.getEditText().getText().toString();
         String password = mPasswordView.getEditText().getText().toString();
 
         boolean cancel = false;
@@ -131,17 +131,11 @@ public class LoginActivity extends Activity
             cancel = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email))
+        // Check for a valid user address.
+        if (TextUtils.isEmpty(user))
         {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        }
-        else if (!isEmailValid(email))
-        {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+            mUserView.setError(getString(R.string.error_field_required));
+            focusView = mUserView;
             cancel = true;
         }
 
@@ -160,11 +154,11 @@ public class LoginActivity extends Activity
             // perform the user login attempt.
             showProgress(true);
 
-            final String hash = Base64.encodeToString((email + ":" + password).getBytes(), Base64.NO_WRAP);
+            final String hash = Base64.encodeToString((user + ":" + password).getBytes(), Base64.NO_WRAP);
 
             HostPreferences.saveSharedSetting(this, "host", host);
             HostPreferences.saveSharedSetting(this, "hash", hash);
-            HostPreferences.saveSharedSetting(this, "email", email);
+            HostPreferences.saveSharedSetting(this, "user", user);
 
             mAuthTask = new UserLoginTask(hash);
             mAuthTask.execute(host + "/api/v1/notebooks");
@@ -174,11 +168,6 @@ public class LoginActivity extends Activity
     private boolean isUrlValid(String url)
     {
         return Patterns.WEB_URL.matcher(url).matches();
-    }
-
-    private boolean isEmailValid(String email)
-    {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     private String formatUrl(String host)
