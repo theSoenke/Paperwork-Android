@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="action_sign_in">Sign in</string>
+  <string name="add_tag">Add Tag</string>
+  <string name="all_notes">All notes</string>
+  <string name="attach_file">Attach file</string>
+  <string name="auth_email">jhgjh</string>
+  <string name="auth_host_url">Server address https://…</string>
+  <string name="auth_password">Password</string>
+  <string name="cancel">Cancel</string>
+  <string name="confirm">dfdfdffffsd
+dsf</string>
+  <string name="create_notebook_title">Create Notebook</string>
+  <string name="delete_note">Delete Note</string>
+  <string name="delete_note_message">Are you sure that you want to delete this note?</string>
+  <string name="delete_title">Delete</string>
+  <string name="discard">asad</string>
+  <string name="discard_changes">Your change are not saved. Do you really want to discard your changes?</string>
+  <string name="edit">Edit</string>
+  <string name="empty_note">Note was not saved</string>
+  <string name="empty_note_hint">Write your note</string>
+  <string name="empty_title_error">Title cannot be empty</string>
+  <string name="empty_title_hint">Your note title</string>
+  <string name="error_field_required">This field is required</string>
+  <string name="error_incorrect_password">Password or email is incorrect</string>
+  <string name="error_invalid_email">This email address is invalid</string>
+  <!-- Login error messages -->
+  <string name="error_invalid_url">This url is invalid</string>
+  <string name="error_timeout">The server is not responding</string>
+  <string name="file">File</string>
+  <string name="hello_test">sdsd</string>
+  <string name="image">Image</string>
+  <string name="logout">Logout</string>
+  <string name="menu_close">Menu closed</string>
+  <string name="menu_open"/>
+  <string name="more"/>
+  <string name="move_to">Move To</string>
+  <string name="move_to_message">Choose the new notebook for this note</string>
+  <string name="note">note</string>
+  <string name="notebooks">Notebooks</string>
+  <string name="notebook_selection_title">Select a notebook</string>
+  <string name="notes">sdsd</string>
+  <string name="no_notes">No notes</string>
+  <string name="save_note">Save</string>
+  <string name="search">Search</string>
+  <string name="settings">Settings</string>
+  <plurals name="share_note">
+    <item quantity="one">share 1</item>
+    <item quantity="other">share other</item>
+    <item quantity="zero">_}}}}share 0</item>
+  </plurals>
+  <string name="tags">Tags</string>
+  <string name="take_photo">Take photo</string>
+  <string name="test1_key"/>
+  <string name="test2">hallo</string>
+  <string name="test3">test5</string>
+  <string name="test4"/>
+  <string name="test_glossary">About Memrise</string>
+  <!-- Strings related to login -->
+  <string name="title_activity_login">Sign in</string>
+  <string name="wait">Please wait…</string>
+</resources>
