@@ -1,0 +1,12 @@
+phraseapp:
+  project_id: 28495c9c5dab15c85b12d9c5f7d2ed54
+  push:
+    sources:
+    - file: ./app/src/main/res/values/strings.xml
+      params:
+        file_format: xml
+  pull:
+    targets:
+    - file: ./app/src/main/res/values-<locale_code>/strings.xml
+      params:
+        file_format: xml
