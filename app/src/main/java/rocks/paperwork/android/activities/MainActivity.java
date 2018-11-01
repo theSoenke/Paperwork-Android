@@ -32,7 +32,7 @@ import rocks.paperwork.android.interfaces.AsyncCallback;
 import rocks.paperwork.android.sync.SyncAdapter;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, AsyncCallback
 {
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private DrawerLayout mDrawerLayout;

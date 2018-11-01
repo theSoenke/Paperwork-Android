@@ -30,7 +30,7 @@ import rocks.paperwork.android.data.DatabaseHelper;
 import rocks.paperwork.android.data.NoteDataSource;
 import rocks.paperwork.android.sync.SyncAdapter;
 
-public class NoteActivity extends AppCompatActivity
+public class NoteActivity extends BaseActivity
 {
     public static final String KEY_NOTE = "note";
     public static final String KEY_EDIT_MODE = "edit_mode";
