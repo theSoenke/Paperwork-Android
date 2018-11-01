@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import rocks.paperwork.android.R;
 import rocks.paperwork.android.fragments.NotesFragment;
 
-public class SearchActivity extends AppCompatActivity implements SearchView.OnQueryTextListener
+public class SearchActivity extends BaseActivity implements SearchView.OnQueryTextListener
 {
     private NotesFragment mNotesFragment;
 

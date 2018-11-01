@@ -38,7 +38,7 @@ import rocks.paperwork.android.data.HostPreferences;
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends Activity
+public class LoginActivity extends BaseActivity
 {
     private UserLoginTask mAuthTask = null; // Keep track of the login task to ensure we can cancel it if requested.
     private TextInputLayout mHostView;
