@@ -61,13 +61,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     {
         super.onCreate(savedInstanceState);
 
-        if (!HostPreferences.preferencesExist(this))
-        {
-            Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(loginIntent);
-            finish();
-            return;
-        }
+//        if (!HostPreferences.preferencesExist(this))
+//        {
+//            Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+//            startActivity(loginIntent);
+//            finish();
+//            return;
+//        }
 
         setContentView(R.layout.activity_main);
 

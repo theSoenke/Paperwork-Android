@@ -20,7 +20,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.github.phrase:android-sdk:0.2.1'
+    implementation 'com.github.phrase:android-sdk:3695bf28cb5783ca2ab94da029d98c10b2288e04'
     implementation 'com.android.support:cardview-v7:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.cocosw:bottomsheet:1.3.0@aar'
