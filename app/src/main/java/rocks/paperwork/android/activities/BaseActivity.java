@@ -1,7 +1,7 @@
 package rocks.paperwork.android.activities;
 
 import android.content.Context;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.phraseapp.android.sdk.PhraseApp;
@@ -14,8 +14,8 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume(){
-        super.onResume();
+    protected void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
         ScreenshotUI.render(this);
     }
 }
